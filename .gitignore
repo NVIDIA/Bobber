@@ -1,0 +1,6 @@
+*__pycache__*
+*.pyc
+build/*
+dist/*
+env/*
+nvidia_bobber.egg-info/
