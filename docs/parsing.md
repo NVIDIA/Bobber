@@ -3,56 +3,12 @@ Bobber includes a couple different parsers which can be used to easily verify
 performance results from a test. By pointing Bobber to the directory where
 results were saved, aggregate values per system-count level will be displayed.
 
-```bash
-$ bobber parse-results path-to-results/
-Systems tested: 1 
-Aggregate Read Bandwidth: 7.996  GB/s
-Aggregate Write Bandwidth: 4.439  GB/s
-Aggregate Read IOPS: 306.9 k IOPS
-Aggregate Write IOPS: 295.5 k IOPS
-NCCL Max Bus Bandwidth: 235.253 at 4096.0 MB
-DALI Standard 800x600
-    Min Speed: 4737.768 images/second (1.37 GB/s)
-    Avg Speed: 5821.491 images/second (1.683 GB/s)
-DALI Standard 3840x2160
-    Min Speed: 772.918 images/second (3.846 GB/s)
-    Avg Speed: 1181.387 images/second (5.879 GB/s)
-DALI TFRecord 800x600
-    Min Speed: 8075.497 images/second (2.335 GB/s)
-    Avg Speed: 9261.151 images/second (2.678 GB/s)
-DALI TFRecord 3840x2160
-    Min Speed: 754.953 images/second (3.757 GB/s)
-    Avg Speed: 1136.786 images/second (5.657 GB/s)
-
-...
-
-Systems tested: 8 
-Aggregate Read Bandwidth: 45.316  GB/s
-Aggregate Write Bandwidth: 7.486  GB/s
-Aggregate Read IOPS: 978.8 k IOPS
-Aggregate Write IOPS: 484.2 k IOPS
-NCCL Max Bus Bandwidth: 140.715 at 4096.0 MB
-DALI Standard 800x600
-    Min Speed: 37558.39 images/second (10.86 GB/s)
-    Avg Speed: 47250.207 images/second (13.662 GB/s)
-DALI Standard 3840x2160
-    Min Speed: 4273.075 images/second (21.262 GB/s)
-    Avg Speed: 9309.804 images/second (46.324 GB/s)
-DALI TFRecord 800x600
-    Min Speed: 58937.738 images/second (17.042 GB/s)
-    Avg Speed: 73999.932 images/second (21.397 GB/s)
-DALI TFRecord 3840x2160
-    Min Speed: 4131.329 images/second (20.557 GB/s)
-    Avg Speed: 9159.931 images/second (45.578 GB/s)
-```
-
-The output displays the aggregate results among all iterations per number of
-nodes tested. For example, if 10 iterations were run, the 1-node results will
-be the average values for all test runs for a single node. As the node count
-goes up, the results reflect the aggregate value for all nodes that were tested.
-
-A table is also automatically generated based on the values above to make it
-possible to view how results scale with additional node counts.
+The output displays a table with the aggregate results among all iterations per
+number of nodes tested. For example, if 10 iterations were run, the 1-node
+results will be the average values for all test runs for a single node. As the
+node count goes up, the results reflect the aggregate value for all nodes that
+were tested. The table is automatically generated based on the values above to
+make it possible to view how results scale with additional node counts.
 
 ```
 +----------------------------------------------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+-------------+---------+

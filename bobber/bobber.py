@@ -169,6 +169,9 @@ def parse_args(version: str) -> Namespace:
                        ' by a test run against a pre-defined baseline to '
                        'verify performance meets an acceptable threshold.',
                        choices=BASELINES)
+    parse.add_argument('--verbose', help='Display text-based information for '
+                       'each system count in addition to the table.',
+                       action='store_true')
 
     # Options specific to building the containers
     build = commands.add_parser(BUILD, help='Build the container')
@@ -307,7 +310,7 @@ def execute_command(args: Namespace, version: str) -> NoReturn:
         A ``string`` of the Bobber version.
     """
     if args.command == PARSE_RESULTS:
-        parse_results.main(args.log_path, args.compare_baseline)
+        parse_results.main(args.log_path, args.compare_baseline, args.verbose)
     elif args.command == BUILD:
         bobber.lib.docker.build(version)
     elif args.command == EXPORT:

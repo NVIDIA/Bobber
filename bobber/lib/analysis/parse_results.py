@@ -107,8 +107,8 @@ def save_json(final_dictionary_output, filename):
         print(f'JSON data saved to {filename}')
 
 
-def main(directory, baseline=None, override_version_check=False,
-         json_filename=None):
+def main(directory, baseline=None, verbose=False,
+         override_version_check=False, json_filename=None):
     final_dictionary_output = {'systems': {}}
 
     log_files = get_files(directory)
@@ -146,7 +146,8 @@ def main(directory, baseline=None, override_version_check=False,
                                      dali_results,
                                      system_num)
         final_dictionary_output['systems'][str(system_num)] = aggregate.json
-        print(aggregate)
+        if verbose:
+            print(aggregate)
 
     final_dictionary_output['total_systems'] = total_systems
     final_dictionary_output['bobber_version'] = bobber_version
