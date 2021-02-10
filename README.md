@@ -19,7 +19,7 @@ Please create an issue if there are any questions on support for different
 requirements.
 
 For more information on installing and using Docker, view the
-[Docker document](docs/Docker.md).
+[Docker document](docs/docker.md).
 
 ### Running on unsupported systems
 Officially, Bobber supports the NVIDIA DGX A100 and DGX-2 platforms for testing,
