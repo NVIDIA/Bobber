@@ -105,9 +105,8 @@ pip3 install https://github.com/NVIDIA/Bobber/releases/download/v6.1.1/nvidia_bo
 
 ## Build Bobber container (includes OSU Tests, NCCL Tests, fio, mdtest, DALI RN50 Pipeline, and the base NGC TensorFlow container)
 The Bobber application includes a built-in mechanism to build the Docker
-container where all tests will be run. This command should be run on a single
-system in the cluster as it will be copied in a future step. For single-node
-tests, run the command on the node to be tested.
+container where all tests will be run. Run the following command on all nodes
+that will be tested.
 
 ```bash
 $ bobber build
@@ -123,13 +122,13 @@ $ docker images | grep nvidia/bobber
 nvidia/bobber               6.1.1               c697a75ee482        36 minutes ago      12.4GB
 ```
 
-## Save container
+## Synchronize container keys
 Bobber relies on shared SSH keys to communicate between containers via MPI. This
-is done by generating an SSH key in the image during build time and using that
-same container on all hosts. This requires saving the image to a local tarball
-and transferring the image to all other nodes. The `export` command saves the
-image as a local tarball. Run the command on the node from the previous step
-where the Docker image is located.
+is done by generating an SSH key on a single node and copying that key to all
+other containers in the cluster. Bobber includes a tool to automatically
+synchronize keys amongst all containers on all nodes. To make the process more
+seamless, it is highly recommended to create passwordless SSH keys to
+communicate between the hosts in order to automatically copy the keys.
 
 If running on a single node, this step is not required.
 

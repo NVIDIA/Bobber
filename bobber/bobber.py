@@ -20,10 +20,12 @@ from bobber.lib.constants import (
     RUN_STG_BW,
     RUN_STG_IOPS,
     RUN_STG_META,
+    SYNC,
     SYSTEMS
 )
 from bobber.lib.analysis import parse_results
 from bobber.lib.system.file_handler import create_directory
+from bobber.lib.system.shell import copy_keys
 from bobber.lib.tests import run_tests
 from typing import NoReturn
 
@@ -227,6 +229,21 @@ def parse_args(version: str) -> Namespace:
                                'binary')
     load.add_argument('filename', help='Filename of local *.tar file of '
                       'the image to load')
+
+    # Options specific to synchronizing SSH keys in containers
+    sync = commands.add_parser(SYNC, help='Create SSH keys and add them to all'
+                               ' Bobber containers in a cluster. Requires the '
+                               'container to be running on all nodes using '
+                               '"bobber cast".')
+    sync.add_argument('--hosts', help='A comma-separated list of hostnames or '
+                      'IP address of the nodes to add SSH keys to. Required '
+                      'for multi-node tests. If left empty, it is assumed '
+                      'that keys should only be copied to the container on '
+                      'the local node.', type=str, default='')
+    sync.add_argument('--user', help='Optionally specify a user to use to '
+                      'login to remote hosts to copy keys to containers. If '
+                      'left blank, will use the currently logged-in user.',
+                      type=str, default='')
     return parser.parse_args()
 
 
@@ -360,6 +377,8 @@ def execute_command(args: Namespace, version: str) -> NoReturn:
         bobber.lib.docker.cast(args.storage_path, args.ignore_gpu, version)
     elif args.command == LOAD:
         bobber.lib.docker.load(args.filename)
+    elif args.command == SYNC:
+        copy_keys(args.hosts, args.user)
     else:
         # Update the version to be used in filenames
         version_underscore = version.replace('.', '_')

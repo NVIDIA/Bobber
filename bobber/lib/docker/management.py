@@ -234,3 +234,24 @@ class DockerManager:
                 print(result.output)
             except StopIteration:
                 break
+
+    def running(self):
+        """
+        Determine if the Bobber container is running on the system.
+
+        Check to see if the current version of the Bobber container is running
+        on the local machine and return the status. This method can be used to
+        determine whether or not to run a command that depends on the container
+        being launched.
+
+        Returns
+        -------
+        boolean
+            Returns `True` when the container is running and `False` when not.
+        """
+        try:
+            bobber = self.client.containers.get('bobber')
+        except docker.errors.NotFound:
+            return False
+        else:
+            return True
