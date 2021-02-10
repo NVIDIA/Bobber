@@ -356,7 +356,7 @@ This repository includes a Python package that can quickly and easily parse
 results captured by Bobber tests. To parse results, point the Bobber parser at
 the results directory and optionally specify a filename for JSON data to be
 saved to. For more information, refer to the
-[parsing document](docs/parsing.md).
+[parsing document](docs/Parsing.md).
 
 # Design Rationale
 
