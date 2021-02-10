@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-FROM nvcr.io/nvidia/tensorflow:20.11-tf2-py3
+FROM nvcr.io/nvidia/cuda:11.2.0-devel-ubuntu18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --allow-downgrades --allow-change-held-
 	openssh-server \
 	swig \
 	bison \
+	gcc \
 	libgfortran3 \
 	pkg-config \
 	autotools-dev \
@@ -44,6 +45,9 @@ RUN apt-get update && apt-get install -y --allow-downgrades --allow-change-held-
 	lsof \
 	fio \
 	psmisc \
+	libopenmpi-dev \
+	python3-dev \
+	python3-pip \
 	python3-distutils && \
 	rm -rf /var/lib/apt/lists/*
 
@@ -68,19 +72,20 @@ WORKDIR /
 RUN git clone https://github.com/NVIDIA/nccl-tests && \
 	cd nccl-tests/ && \
 	git reset --hard ec1b5e22e618d342698fda659efdd5918da6bd9f && \
-	make MPI=1 MPI_HOME=/usr/local/mpi
+	make MPI=1 MPI_HOME=/usr/lib/x86_64-linux-gnu/openmpi
 
 RUN wget --no-check-certificate https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-5.6.2.tar.gz && \
 	tar zxf osu-micro-benchmarks-5.6.2.tar.gz && \
 	cd osu-micro-benchmarks-5.6.2 && \
-	./configure CC=/usr/local/mpi/bin/mpicc CXX=/usr/local/mpi/bin/mpicxx --enable-cuda --with-cuda-include=/usr/local/cuda/include --with-cuda-libpath=/usr/local/cuda/lib64 && \
+	./configure CC=/usr/bin/mpicc CXX=/usr/bin/mpicxx --enable-cuda --with-cuda-include=/usr/local/cuda/include --with-cuda-libpath=/usr/local/cuda/lib64 && \
 	make && \
 	make install && \
 	rm -rf ../*.tar.gz
 
-RUN python3 -m pip install nvidia-pyindex && \
-    python3 -m pip install \
-        nvidia-imageinary['mxnet']>=1.1.2
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools && \
+    python3 -m pip install --no-cache-dir nvidia-pyindex && \
+    python3 -m pip install --no-cache-dir \
+        nvidia-imageinary['all']>=1.1.2
 
 RUN git clone https://github.com/jyvet/io-500-dev && \
 	cd io-500-dev && \
