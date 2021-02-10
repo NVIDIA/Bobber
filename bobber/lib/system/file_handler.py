@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 import os
+import yaml
 from typing import NoReturn
 
 
@@ -29,3 +30,21 @@ def update_log(logfile: str, contents: str) -> NoReturn:
     """
     with open(logfile, 'a') as log:
         log.write(contents)
+
+
+def read_yaml(filename: str) -> dict:
+    """
+    Read a YAML file and return the contents.
+
+    Parameters
+    ----------
+    filename : string
+        A ``string`` of the full file path to read.
+
+    Returns
+    -------
+    dict
+        Returns a ``dict`` representing the entire contents of the file.
+    """
+    with open(filename, 'r') as handler:
+        return yaml.safe_load(handler)

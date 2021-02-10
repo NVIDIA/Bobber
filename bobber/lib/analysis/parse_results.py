@@ -107,7 +107,7 @@ def save_json(final_dictionary_output, filename):
         print(f'JSON data saved to {filename}')
 
 
-def main(directory, baseline=None, verbose=False,
+def main(directory, baseline=None, custom_baseline=None, verbose=False,
          override_version_check=False, json_filename=None):
     final_dictionary_output = {'systems': {}}
 
@@ -154,5 +154,7 @@ def main(directory, baseline=None, verbose=False,
     display_table(final_dictionary_output)
     save_json(final_dictionary_output, json_filename)
 
-    if baseline:
+    if custom_baseline:
+        compare_baseline(final_dictionary_output, custom_baseline, custom=True)
+    elif baseline:
         compare_baseline(final_dictionary_output, baseline)

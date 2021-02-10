@@ -167,8 +167,14 @@ def parse_args(version: str) -> Namespace:
                        'was used for all tests.', action='store_true')
     parse.add_argument('--compare-baseline', help='Compare the values produced'
                        ' by a test run against a pre-defined baseline to '
-                       'verify performance meets an acceptable threshold.',
+                       'verify performance meets an acceptable threshold. '
+                       'This command is ignored if the --custom-baseline flag '
+                       'is used.',
                        choices=BASELINES)
+    parse.add_argument('--custom-baseline', help='Compare against a custom '
+                       'baseline to verify performance meets an acceptable '
+                       'threshold. This command overrides the '
+                       '--compare-baseline flag.', type=str)
     parse.add_argument('--verbose', help='Display text-based information for '
                        'each system count in addition to the table.',
                        action='store_true')
@@ -310,7 +316,8 @@ def execute_command(args: Namespace, version: str) -> NoReturn:
         A ``string`` of the Bobber version.
     """
     if args.command == PARSE_RESULTS:
-        parse_results.main(args.log_path, args.compare_baseline, args.verbose)
+        parse_results.main(args.log_path, args.compare_baseline,
+                           args.custom_baseline, args.verbose)
     elif args.command == BUILD:
         bobber.lib.docker.build(version)
     elif args.command == EXPORT:

@@ -2,6 +2,7 @@
 import sys
 from bobber.lib.constants import BASELINES
 from bobber.lib.analysis.common import bcolors
+from bobber.lib.system.file_handler import read_yaml
 
 
 # Map the dicitonary keys in the baseline to human-readable names.
@@ -97,15 +98,21 @@ def evaluate_test(baseline, results, system_count):
         sys.exit(1)
 
 
-def compare_baseline(results, baseline):
+def compare_baseline(results, baseline, custom=False):
     print('=' * 80)
     print('Baseline assessment')
-    print(f'Comparing against "{baseline}"')
-    baseline = BASELINES[baseline]
+    if custom:
+        print('Comparing against a custom config')
+        baseline = read_yaml(baseline)
+    else:
+        print(f'Comparing against "{baseline}"')
+        baseline = BASELINES[baseline]
 
     for system_count, baseline_results in baseline['systems'].items():
+        print('=' * 80)
+        print(f' {system_count} System(s)')
         evaluate_test(baseline_results,
-                      results['systems'][system_count],
+                      results['systems'][str(system_count)],
                       system_count)
 
     print('=' * 80)

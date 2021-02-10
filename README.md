@@ -358,6 +358,11 @@ the results directory and optionally specify a filename for JSON data to be
 saved to. For more information, refer to the
 [parsing document](docs/parsing.md).
 
+## Comparing baselines
+The results parser can be extended to compare results against an existing
+baseline, either built-in to Bobber or passed in as a YAML file. For more
+information, refer to the [baselines document](docs/baselines.md).
+
 # Design Rationale
 
 ## Submodules

@@ -4,6 +4,7 @@ docker==4.3.1
 idna==2.10
 numpy==1.19.5
 pycodestyle==2.6.0
+PyYAML==5.4.1
 requests==2.24.0
 six==1.15.0
 tabulate==0.8.7
