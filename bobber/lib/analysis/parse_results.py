@@ -112,6 +112,11 @@ def main(directory, baseline=None, verbose=False,
     final_dictionary_output = {'systems': {}}
 
     log_files = get_files(directory)
+    if len(log_files) < 1:
+        print('No log files found. Please specify a directory containing '
+              'valid logs.')
+        print('Exiting...')
+        sys.exit(1)
     bobber_version = check_bobber_version(log_files,
                                           override_version_check)
     bw_results = parse_fio_bw(log_files)
