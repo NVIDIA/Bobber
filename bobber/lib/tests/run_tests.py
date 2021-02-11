@@ -5,9 +5,7 @@ from bobber.lib.constants import (
     RUN_ALL,
     RUN_DALI,
     RUN_NCCL,
-    RUN_NETWORKING,
     RUN_STG_BW,
-    RUN_STG_FILL,
     RUN_STG_IOPS,
     RUN_STG_META
 )

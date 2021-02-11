@@ -15,14 +15,11 @@ from bobber.lib.constants import (
     LOAD,
     PARSE_RESULTS,
     RUN_ALL,
-    RUN_STRESS,
     RUN_DALI,
     RUN_NCCL,
-    RUN_NETWORKING,
     RUN_STG_BW,
     RUN_STG_IOPS,
     RUN_STG_META,
-    RUN_STG_FILL,
     SYSTEMS
 )
 from bobber.lib.analysis import parse_results
@@ -132,13 +129,9 @@ def parse_args(version: str) -> Namespace:
     # Create the test initiation commands with the general options above
     commands.add_parser(RUN_ALL, help='Run all tests',
                         parents=[commands_parent])
-    commands.add_parser(RUN_STRESS, help='Run NVSM stress test only',
-                        parents=[commands_parent])
     commands.add_parser(RUN_DALI, help='Run DALI tests only',
                         parents=[commands_parent])
     commands.add_parser(RUN_NCCL, help='Run NCCL tests only',
-                        parents=[commands_parent])
-    commands.add_parser(RUN_NETWORKING, help='Run networking tests only',
                         parents=[commands_parent])
     commands.add_parser(RUN_STG_BW, help='Run storage bandwdith tests only',
                         parents=[commands_parent])
@@ -146,9 +139,6 @@ def parse_args(version: str) -> Namespace:
                         parents=[commands_parent])
     commands.add_parser(RUN_STG_META, help='Run storage metadata tests only',
                         parents=[commands_parent])
-    commands.add_parser(RUN_STG_FILL, help='Run storage fill workload - '
-                        'intended to run only from a single client, will '
-                        'ignore --hosts argument')
 
     # Options specific to exporting the containers
     export = commands.add_parser(EXPORT, help='Export the container for '
