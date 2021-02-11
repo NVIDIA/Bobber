@@ -68,6 +68,20 @@ the YAML file location and log directory, if applicable:
 bobber parse-results --custom-baseline custom_baseline_file.yaml results_log/
 ```
 
+### Adding a tolerance
+Both of the baseline methods above allow a custom tolerance to be specified to
+give some wiggle-room in the results. Pass a percentage amount to allow below
+the baseline.
+
+Take for example a baseline that expects 10 GB/s from reads using FIO. If the
+test results yield 9.8 GB/s, this will be marked as a FAIL. However, if the
+tolerance is 5%, this will instead be marked as a PASS as 9.8 GB/s is within 5%
+of the expected value of 10 GB/s.
+
+To add a tolerance, add the `--baseline-tolerance` flag to either of the
+commands above. The default tolerance is 0% if not specified, meaning the test
+will fail if it is exactly at or below the baseline value.
+
 ## Baseline results output
 Regardless of which baseline method from above is chosen, the results will
 compare the performance from the requested results file with the baseline of
