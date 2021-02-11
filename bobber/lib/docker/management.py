@@ -100,7 +100,6 @@ class DockerManager:
             detach=True,
             auto_remove=True,
             ipc_mode='host',
-            mem_limit='40g',
             name='bobber',
             network_mode='host',
             privileged=True,
