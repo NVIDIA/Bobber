@@ -47,6 +47,7 @@ def parse_args(version: str) -> Namespace:
         the application during runtime.
     """
     parser = ArgumentParser(f'Bobber Version: {version}')
+    parser.add_argument('--version', action='version', version=__version__)
     # Required positional command subparser which should be specified first
     commands = parser.add_subparsers(dest='command', metavar='command')
     commands_parent = ArgumentParser(add_help=False)
