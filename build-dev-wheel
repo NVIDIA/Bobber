@@ -1,0 +1,39 @@
+#!/bin/bash
+# SPDX-License-Identifier: MIT
+bump_minor() {
+  arr=(${version//./ })
+  major=${arr[0]}
+  minor=$(( ${arr[1]} + 1 ))
+  patch=0
+  echo "__version__ = '$major.$minor.$patch.dev$timestamp'" >> bobber/__version__.py
+}
+
+bump_patch() {
+  arr=(${version//./ })
+  major=${arr[0]}
+  minor=${arr[1]}
+  patch=$(( ${arr[2]} + 1 ))
+  echo "__version__ = '$major.$minor.$patch.dev$timestamp'" >> bobber/__version__.py
+}
+
+bump_current() {
+  arr=(${version//./ })
+  major=${arr[0]}
+  minor=${arr[1]}
+  patch=${arr[2]}
+  echo "__version__ = '$major.$minor.$patch.dev$timestamp'" >> bobber/__version__.py
+}
+
+# Get the latest version number
+version=`python3 -c "from bobber.__version__ import __version__; print(__version__)"`
+timestamp=$(date '+%Y%m%d%H%M%S')
+
+echo "# SPDX-License-Identifier: MIT" > bobber/__version__.py
+
+case $1 in
+  minor) bump_minor;;
+  patch) bump_patch;;
+  *) bump_current;;
+esac
+
+python3 setup.py bdist_wheel sdist
