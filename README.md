@@ -75,26 +75,23 @@ usage: Bobber Version: 6.0.0 [-h] command ...
 
 positional arguments:
   command
-    run-all       Run all tests
-    run-stress    Run NVSM stress test only
-    run-dali      Run DALI tests only
-    run-nccl      Run NCCL tests only
-    run-networking
-                  Run networking tests only
-    run-stg-bw    Run storage bandwdith tests only
-    run-stg-iops  Run storage IOPS tests only
-    run-stg-meta  Run storage metadata tests only
-    run-stg-fill  Run storage fill workload - intended to run only from a
-                  single client, will ignore --hosts argument
-    export        Export the container for multisystem tests
+    run-all      Run all tests
+    run-dali     Run DALI tests only
+    run-nccl     Run NCCL tests only
+    run-stg-bw   Run storage bandwdith tests only
+    run-stg-iops
+                 Run storage IOPS tests only
+    run-stg-meta
+                 Run storage metadata tests only
+    export       Export the container for multisystem tests
     parse-results
-                  Parse and display resultsfrom the log files
-    build         Build the container
-    cast          Start the container
-    load          Load a container from a local binary
+                 Parse and display resultsfrom the log files
+    build        Build the container
+    cast         Start the container
+    load         Load a container from a local binary
 
 optional arguments:
-  -h, --help      show this help message and exit
+  -h, --help     show this help message and exit
 ```
 
 ## Build Bobber container (includes OSU Tests, NCCL Tests, fio, mdtest, DALI RN50 Pipeline, and the base NGC TensorFlow container)

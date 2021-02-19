@@ -5,14 +5,11 @@ CAST = 'cast'
 LOAD = 'load'
 PARSE_RESULTS = 'parse-results'
 RUN_ALL = 'run-all'
-RUN_STRESS = 'run-stress'
 RUN_DALI = 'run-dali'
 RUN_NCCL = 'run-nccl'
-RUN_NETWORKING = 'run-networking'
 RUN_STG_BW = 'run-stg-bw'
 RUN_STG_IOPS = 'run-stg-iops'
 RUN_STG_META = 'run-stg-meta'
-RUN_STG_FILL = 'run-stg-fill'
 
 DGX_A100_SINGLE = {
     'gpus': 8,
