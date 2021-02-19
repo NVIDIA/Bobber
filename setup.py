@@ -8,8 +8,7 @@ with open('README.md', 'r') as f:
 setup(
     name='nvidia-bobber',
     version=__version__,
-    description='''Containerized testing of system components that impact AI
-workload performance''',
+    description='Containerized testing of system components that impact AI workload performance',
     long_description=long_description,
     packages=['bobber',
               'bobber/lib',
