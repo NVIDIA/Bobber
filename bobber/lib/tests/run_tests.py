@@ -238,8 +238,6 @@ def kickoff_test(args: Namespace, bobber_version: str, iteration: int,
         run_stg_iops(args, bobber_version, iteration, hosts)
     elif args.command == RUN_STG_META:
         run_stg_meta(args, bobber_version, iteration, hosts)
-    elif args.command == RUN_STG_FILL:
-        run_stg_fill(args, bobber_version, iteration, hosts)
     elif args.command == RUN_ALL:
         run_nccl(args, bobber_version, iteration, hosts)
         run_stg_meta(args, bobber_version, iteration, hosts)
