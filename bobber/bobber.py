@@ -167,8 +167,24 @@ def parse_args(version: str) -> Namespace:
                        'was used for all tests.', action='store_true')
     parse.add_argument('--compare-baseline', help='Compare the values produced'
                        ' by a test run against a pre-defined baseline to '
-                       'verify performance meets an acceptable threshold.',
+                       'verify performance meets an acceptable threshold. '
+                       'This command is ignored if the --custom-baseline flag '
+                       'is used.',
                        choices=BASELINES)
+    parse.add_argument('--custom-baseline', help='Compare against a custom '
+                       'baseline to verify performance meets an acceptable '
+                       'threshold. This command overrides the '
+                       '--compare-baseline flag.', type=str)
+    parse.add_argument('--baseline-tolerance', help='The percentage of '
+                       'tolerance to include while comparing results against '
+                       'a baseline. For example, if the desire is to allow '
+                       'results to be within 5%% of the baseline and still '
+                       'pass, enter "5" for the tolerance. This will only '
+                       'measure tolerance below the result and will not punish'
+                       ' if numbers are higher than the baseline above the '
+                       'tolerance level. This value is ignored if not running '
+                       'the baseline comparison. Defaults to 0 tolerance.',
+                       type=int, default=0)
     parse.add_argument('--verbose', help='Display text-based information for '
                        'each system count in addition to the table.',
                        action='store_true')
@@ -310,7 +326,9 @@ def execute_command(args: Namespace, version: str) -> NoReturn:
         A ``string`` of the Bobber version.
     """
     if args.command == PARSE_RESULTS:
-        parse_results.main(args.log_path, args.compare_baseline, args.verbose)
+        parse_results.main(args.log_path, args.compare_baseline,
+                           args.custom_baseline, args.baseline_tolerance,
+                           args.verbose)
     elif args.command == BUILD:
         bobber.lib.docker.build(version)
     elif args.command == EXPORT:

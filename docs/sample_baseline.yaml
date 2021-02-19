@@ -1,0 +1,37 @@
+systems:
+    1:
+        bandwidth:
+            # FIO BW speed in bytes/second
+            read: 1200000000
+            write: 1000000000
+        iops:
+            # FIO IOPS speed in ops/second
+            read: 100000
+            write: 100000
+        nccl:
+            # NCCL maximum bus bandwidth in GB/s
+            max_bus_bw: 230
+        dali:
+            # DALI average speed in images/second
+            800x600 standard jpg: 2000
+            3840x2160 standard jpg: 300
+            800x600 tfrecord: 2000
+            3840x2160 tfrecord: 300
+    2:
+        bandwidth:
+            # FIO BW speed in bytes/second
+            read: 2400000000
+            write: 2000000000
+        iops:
+            # FIO IOPS speed in ops/second
+            read: 200000
+            write: 200000
+        nccl:
+            # NCCL maximum bus bandwidth in GB/s
+            max_bus_bw: 185
+        dali:
+            # DALI average speed in images/second
+            800x600 standard jpg: 4000
+            3840x2160 standard jpg: 600
+            800x600 tfrecord: 4000
+            3840x2160 tfrecord: 600

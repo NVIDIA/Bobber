@@ -33,6 +33,7 @@ setup(
     install_requires=[
         'docker >= 4.3.1',
         'numpy >= 1.9.5',
+        'pyyaml >= 5.4.0',
         'tabulate >= 0.8.7'
     ]
 )

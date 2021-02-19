@@ -2,6 +2,7 @@
 import sys
 from bobber.lib.constants import BASELINES
 from bobber.lib.analysis.common import bcolors
+from bobber.lib.system.file_handler import read_yaml
 
 
 # Map the dicitonary keys in the baseline to human-readable names.
@@ -13,7 +14,11 @@ TEST_MAPPING = {
 }
 
 
-def metric_passes(expected, got):
+def metric_passes(expected, got, tolerance):
+    if tolerance > 0:
+        # If user passes a 5% tolerance, multiply the expected value by 5% less
+        # than current value to get the tolerance.
+        expected = (1 - tolerance / 100) * expected
     if got > expected:
         return True
     else:
@@ -29,7 +34,7 @@ def result_text(result, failures):
     return output, failures
 
 
-def evaluate_fio(baselines, results, test_name, failures):
+def evaluate_fio(baselines, results, test_name, failures, tolerance):
     for test, value in baselines.items():
         if test_name == 'bandwidth':
             unit = '(GB/s)'
@@ -41,52 +46,54 @@ def evaluate_fio(baselines, results, test_name, failures):
             got = round(results[test_name][test] / 1000, 3)
         print(f'  {TEST_MAPPING[test_name]} {test.title()} {unit}')
         text = f'    Expected: {expected}, Got: {got}'
-        result = metric_passes(expected, got)
+        result = metric_passes(expected, got, tolerance)
         output, failures = result_text(result, failures)
         text += f', Result: {output}'
         print(text)
     return failures
 
 
-def evaluate_nccl(baseline, results, failures):
+def evaluate_nccl(baseline, results, failures, tolerance):
     print('  NCCL Max Bus Bandwidth (GB/s)')
     expected = baseline['max_bus_bw']
     got = results['nccl']['max_bus_bw']
     text = f'    Expected: {expected}, Got: {got}'
-    result = metric_passes(expected, got)
+    result = metric_passes(expected, got, tolerance)
     output, failures = result_text(result, failures)
     text += f', Result: {output}'
     print(text)
     return failures
 
 
-def evaluate_dali(baselines, results, test_name, failures):
+def evaluate_dali(baselines, results, test_name, failures, tolerance):
     for test, value in baselines.items():
         print(f'  DALI {test} (images/second)')
         expected = value
         got = round(results[test]['average images/second'], 3)
         text = f'    Expected: {expected}, Got: {got}'
-        result = metric_passes(expected, got)
+        result = metric_passes(expected, got, tolerance)
         output, failures = result_text(result, failures)
         text += f', Result: {output}'
         print(text)
     return failures
 
 
-def evaluate_test(baseline, results, system_count):
+def evaluate_test(baseline, results, system_count, tolerance):
     failures = 0
 
     for test_name, test_values in baseline.items():
         print('-' * 80)
         if test_name in ['bandwidth', 'iops']:
-            failures = evaluate_fio(test_values, results, test_name, failures)
+            failures = evaluate_fio(test_values, results, test_name, failures,
+                                    tolerance)
         elif test_name == 'nccl':
-            failures = evaluate_nccl(test_values, results, failures)
+            failures = evaluate_nccl(test_values, results, failures, tolerance)
         elif test_name == 'dali':
             failures = evaluate_dali(test_values,
                                      results['dali'],
                                      test_name,
-                                     failures)
+                                     failures,
+                                     tolerance)
 
     if failures > 0:
         print('-' * 80)
@@ -97,15 +104,28 @@ def evaluate_test(baseline, results, system_count):
         sys.exit(1)
 
 
-def compare_baseline(results, baseline):
+def compare_baseline(results, baseline, tolerance, custom=False):
     print('=' * 80)
     print('Baseline assessment')
-    print(f'Comparing against "{baseline}"')
-    baseline = BASELINES[baseline]
+    if custom:
+        print('Comparing against a custom config')
+        baseline = read_yaml(baseline)
+    else:
+        print(f'Comparing against "{baseline}"')
+        baseline = BASELINES[baseline]
+    if tolerance > 0:
+        print(f'Allowing a tolerance of {tolerance}% below expected to PASS')
 
     for system_count, baseline_results in baseline['systems'].items():
+        print('=' * 80)
+        if str(system_count) not in results['systems'].keys():
+            print(f'No results found for {system_count} system(s)')
+            print('Skipping...')
+            continue
+        print(f' {system_count} System(s)')
         evaluate_test(baseline_results,
-                      results['systems'][system_count],
-                      system_count)
+                      results['systems'][str(system_count)],
+                      system_count,
+                      tolerance)
 
     print('=' * 80)

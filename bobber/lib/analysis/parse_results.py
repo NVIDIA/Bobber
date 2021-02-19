@@ -107,8 +107,8 @@ def save_json(final_dictionary_output, filename):
         print(f'JSON data saved to {filename}')
 
 
-def main(directory, baseline=None, verbose=False,
-         override_version_check=False, json_filename=None):
+def main(directory, baseline=None, custom_baseline=None, tolerance=0,
+         verbose=False, override_version_check=False, json_filename=None):
     final_dictionary_output = {'systems': {}}
 
     log_files = get_files(directory)
@@ -159,5 +159,8 @@ def main(directory, baseline=None, verbose=False,
     display_table(final_dictionary_output)
     save_json(final_dictionary_output, json_filename)
 
-    if baseline:
-        compare_baseline(final_dictionary_output, baseline)
+    if custom_baseline:
+        compare_baseline(final_dictionary_output, custom_baseline, tolerance,
+                         custom=True)
+    elif baseline:
+        compare_baseline(final_dictionary_output, baseline, tolerance)
