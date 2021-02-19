@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 import sys
 from bobber.lib.constants import BASELINES
+from bobber.lib.exit_codes import BASELINE_FAILURE
 from bobber.lib.analysis.common import bcolors
 from bobber.lib.system.file_handler import read_yaml
 
@@ -101,7 +102,7 @@ def evaluate_test(baseline, results, system_count, tolerance):
         print('See results above for failed tests and verify setup.')
         # Throw a non-zero exit status so any tools that read codes will catch
         # that the baseline was not met.
-        sys.exit(1)
+        sys.exit(BASELINE_FAILURE)
 
 
 def compare_baseline(results, baseline, tolerance, custom=False):

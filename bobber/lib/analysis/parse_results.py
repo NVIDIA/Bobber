@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from glob import glob
 from os.path import join
+from bobber.lib.exit_codes import MISSING_LOG_FILES, SUCCESS
 from bobber.lib.analysis.aggregate_results import AggregateResults
 from bobber.lib.analysis.common import (check_bobber_version,
                                         divide_logs_by_systems)
@@ -86,7 +87,7 @@ def verify_template(template):
             response = input(prompt)
         except KeyboardInterrupt:
             print('Keyboard interrupt - exiting...')
-            sys.exit()
+            sys.exit(SUCCESS)
         if response.lower().strip() == 'y':
             break
         elif response.lower().strip() == 'n':
@@ -94,7 +95,7 @@ def verify_template(template):
             print('Please update the template file located in '
                   'analysis/template.yaml and run again.')
             print('Exiting...')
-            sys.exit()
+            sys.exit(SUCCESS)
 
 
 def save_json(final_dictionary_output, filename):
@@ -116,7 +117,7 @@ def main(directory, baseline=None, custom_baseline=None, tolerance=0,
         print('No log files found. Please specify a directory containing '
               'valid logs.')
         print('Exiting...')
-        sys.exit(1)
+        sys.exit(MISSING_LOG_FILES)
     bobber_version = check_bobber_version(log_files,
                                           override_version_check)
     bw_results = parse_fio_bw(log_files)
