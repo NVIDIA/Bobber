@@ -106,9 +106,17 @@ def find_num_nodes(logfile):
     return num_nodes
 
 
+def find_filesystem_test_path(logfile):
+    container_mounts_line = re.findall(r'container-mounts=\S*:/data', logfile)
+    container_data_mount = container_mounts_line[0].replace(
+        'container-mounts=', '')
+    return container_data_mount
+
+
 def read_files(logfiles):
     all_results = []
     prev_nodes_found = None
+    prev_filesystem_test_path = None
 
     for filename in logfiles:
         with open(filename, 'r') as logpointer:
@@ -116,26 +124,32 @@ def read_files(logfiles):
             results = parse_file(log)
             all_results.append(results)
             nodes_tested = find_num_nodes(log)
+            filesystem_test_path = find_filesystem_test_path(log)
             if prev_nodes_found and nodes_tested != prev_nodes_found:
                 raise ValueError('Error: Mixed node sizes found in log files!')
+            if prev_filesystem_test_path and \
+                    filesystem_test_path != prev_filesystem_test_path:
+                raise ValueError('Error: Mixed test paths found in log files!')
             prev_nodes_found = nodes_tested
+            prev_filesystem_test_path = filesystem_test_path
     aggregate = Aggregate(
         [result.epoch_zero_speed for result in all_results],
         [result.epoch_zero_time for result in all_results],
         [result.elapsed_time for result in all_results],
         [result.average_speed for result in all_results]
     )
-    return aggregate, nodes_tested
+    return aggregate, nodes_tested, filesystem_test_path
 
 
-def print_averages(results, directory, nodes_tested):
+def print_averages(results, directory, nodes_tested, filesystem_test_path):
     e_zero_speed = average(results.epoch_zero_speeds)
     e_zero_time = ms_to_seconds(average(results.epoch_zero_times))
     overall_speed = average(results.average_speeds)
     overall_time = ms_to_minutes(average(results.elapsed_times))
 
     output = f"""MLPerf Results:
-Directory name: {directory}
+Log directory name: {directory}
+Filesystem test path: {filesystem_test_path}
 Number of iterations: {len(results.epoch_zero_speeds)}
 Nodes tested: {nodes_tested}
 Epoch 0:
@@ -150,8 +164,9 @@ Overall:
 def main():
     args = parse_args()
     logfiles = get_files(args.directory)
-    aggregate, nodes_tested = read_files(logfiles)
-    print_averages(aggregate, args.directory, nodes_tested)
+    aggregate, nodes_tested, filesystem_test_path = read_files(logfiles)
+    print_averages(aggregate, args.directory, nodes_tested,
+                   filesystem_test_path)
 
 
 if __name__ == '__main__':
