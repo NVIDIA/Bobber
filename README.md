@@ -120,7 +120,7 @@ After building, verify the image is accessible in Docker:
 
 ```bash
 $ docker images | grep nvidia/bobber
-nvidia/bobber               6.3.0               c697a75ee482        36 minutes ago      12.4GB
+nvidia/bobber               6.3.0               8e545fee7a4d        10 minutes ago      5.23GB
 ```
 
 ## Save container
@@ -153,7 +153,7 @@ scp -r nvidia_bobber_{version}.tar user@test-machine-3:~/bobber
 
 Do this for each host you intend to include in the test. A bash `for` loop to
 can be used to iterate over all systems - you could also target the high
-performance network to speed up the copy further (this is a 10+ GB copy). Like
+performance network to speed up the copy further (this is a 5+ GB copy). Like
 so:
 
 ```bash
@@ -170,7 +170,7 @@ On all other nodes, load the copied Docker image.
 ```bash
 $ docker load < nvidia_bobber_{version}.tar
 $ docker images | grep bobber
-nvidia/bobber               6.3.0               c697a75ee482        36 minutes ago      12.4GB
+nvidia/bobber               6.3.0               8e545fee7a4d        10 minutes ago      5.23GB
 ```
 
 ## Ensure shared filesystem is mounted, if necessary
@@ -219,7 +219,7 @@ To verify the container is running, use `docker ps`:
 ```bash
 $ docker ps
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
-317b6cf928f8        c697a75ee482        "/usr/local/bin/nvid…"   30 hours ago        Up 30 hours                             bobber
+317b6cf928f8        8e545fee7a4d        "/usr/local/bin/nvid…"   30 hours ago        Up 30 hours                             bobber
 ```
 
 ## Create log dir on primary test system
