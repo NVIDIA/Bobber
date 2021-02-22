@@ -4,7 +4,7 @@ from collections import defaultdict
 
 
 class bcolors:
-    PASS = '\033[92m'
+    PASS = '\033[92m'  # nosec
     WARNING = '\033[93m'
     FAIL = '\033[91m'
     BOLD = '\033[1m'
