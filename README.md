@@ -37,7 +37,7 @@ Using `wget`, download the binary using the address from the previous step to al
 remote machines which will be tested, for example:
 
 ```bash
-wget https://github.com/NVIDIA/Bobber/releases/download/v6.0.0/nvidia_bobber-6.0.0-py3-none-any.whl
+wget https://github.com/NVIDIA/Bobber/releases/download/v6.1.1/nvidia_bobber-6.1.1-py3-none-any.whl
 ```
 
 ## Python dependency installation
@@ -64,14 +64,14 @@ The installation can be verified with `pip3 freeze` after completion:
 
 ```bash
 $ pip3 freeze | grep bobber
-nvidia-bobber==6.0.0
+nvidia-bobber==6.1.1
 ```
 
 Bobber can also be verified by printing the usage statement:
 
 ```
 $ bobber --help
-usage: Bobber Version: 6.0.0 [-h] command ...
+usage: Bobber Version: 6.1.1 [-h] command ...
 
 positional arguments:
   command
@@ -104,14 +104,14 @@ tests, run the command on the node to be tested.
 $ bobber build
 Building a new image. This may take a while...
 ...
-nvidia/bobber:6.0.0 successfully built
+nvidia/bobber:6.1.1 successfully built
 ```
 
 After building, verify the image is accessible in Docker:
 
 ```bash
 $ docker images | grep nvidia/bobber
-nvidia/bobber               6.0.0               c697a75ee482        36 minutes ago      12.4GB
+nvidia/bobber               6.1.1               c697a75ee482        36 minutes ago      12.4GB
 ```
 
 ## Save container
@@ -126,10 +126,10 @@ If running on a single node, this step is not required.
 
 ```bash
 $ bobber export
-Exporting nvidia/bobber:6.0.0 to "nvidia_bobber_6.0.0.tar". This may take a while...
-nvidia/bobber:6.0.0 saved to nvidia_bobber_6.0.0.tar
+Exporting nvidia/bobber:6.1.1 to "nvidia_bobber_6.1.1.tar". This may take a while...
+nvidia/bobber:6.1.1 saved to nvidia_bobber_6.1.1.tar
 $ ls
-nvidia_bobber_6.0.0.tar
+nvidia_bobber_6.1.1.tar
 ```
 
 ## Copy container to other nodes
@@ -161,7 +161,7 @@ On all other nodes, load the copied Docker image.
 ```bash
 $ docker load < nvidia_bobber_{version}.tar
 $ docker images | grep bobber
-nvidia/bobber               6.0.0               c697a75ee482        36 minutes ago      12.4GB
+nvidia/bobber               6.1.1               c697a75ee482        36 minutes ago      12.4GB
 ```
 
 ## Ensure shared filesystem is mounted, if necessary
