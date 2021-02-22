@@ -47,7 +47,7 @@ MLPerf results. Note that MLPerf is **not** included in Bobber though results
 from the ResNet50 image classification benchmarks can be parsed here.
 
 ```bash
-$ python3 analysis/parse-mlperf.py path_to_results/
+$ python3 bobber/lib/analysis/parse-mlperf.py path_to_results/
 MLPerf Results:
 Directory name: path_to_results/
 Number of iterations: 5
