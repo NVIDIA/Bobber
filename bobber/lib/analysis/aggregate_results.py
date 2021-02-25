@@ -26,6 +26,7 @@ class AggregateResults:
                  max_bw,
                  bytes_sizes,
                  dali_results,
+                 metadata,
                  systems):
         self._read_bw = read_bw
         self._read_bw_params = read_bw_params
@@ -38,6 +39,7 @@ class AggregateResults:
         self._max_bw = max_bw
         self._bytes_sizes = bytes_sizes
         self._dali_results = dali_results
+        self._metadata = metadata
         self._num_systems = systems
 
     def __str__(self):
@@ -59,6 +61,10 @@ class AggregateResults:
                        f'{round(self.max_bus_bandwidth, 3)} '
                        f'at {self.max_bus_bytes / 1024 / 1024} MB')
 
+        if self._metadata:
+            output += '\n'
+            output += self._metadata_print()
+
         if self._dali_results_print('800x600 standard jpg'):
             output += (f"""
 DALI Standard 800x600{self._dali_results_print('800x600 standard jpg')}
@@ -68,6 +74,15 @@ DALI TFRecord 3840x2160{self._dali_results_print('3840x2160 tfrecord')}
 """)
         else:
             output += '\n'
+        return output
+
+    def _metadata_print(self):
+        output = 'Mdtest\n'
+
+        if self._metadata[self._num_systems] == '':
+            return ''
+        for key, values in self._metadata[self._num_systems].items():
+            output += (f"    {key}: {values['mean']} ops\n")
         return output
 
     def _dali_results_print(self, size):

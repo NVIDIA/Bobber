@@ -12,6 +12,7 @@ from bobber.lib.analysis.common import (check_bobber_version,
 from bobber.lib.analysis.compare_baseline import compare_baseline
 from bobber.lib.analysis.dali import parse_dali_file
 from bobber.lib.analysis.fio import parse_fio_bw_file, parse_fio_iops_file
+from bobber.lib.analysis.meta import parse_meta_file
 from bobber.lib.analysis.nccl import parse_nccl_file
 from bobber.lib.analysis.table import display_table
 
@@ -76,6 +77,16 @@ def parse_dali(log_files):
     return results_dict
 
 
+def parse_meta(log_files):
+    results_dict = {}
+
+    meta_logs_by_systems = divide_logs_by_systems(log_files, 'stg_meta')
+
+    for systems, files in meta_logs_by_systems.items():
+        results_dict = parse_meta_file(files, systems, results_dict)
+    return results_dict
+
+
 def verify_template(template):
     print('Analyzing the template file for accuracy...')
     print()
@@ -124,12 +135,13 @@ def main(directory, baseline=None, custom_baseline=None, tolerance=0,
     read_bw, write_bw, read_bw_params, write_bw_params = bw_results
     iops_results = parse_fio_iops(log_files)
     read_iops, write_iops, read_iops_params, write_iops_params = iops_results
+    metadata = parse_meta(log_files)
     max_bw, bytes_sizes = parse_nccl(log_files)
     dali_results = parse_dali(log_files)
     total_systems = 0
     systems = []
 
-    for result in [read_bw, read_iops, max_bw, dali_results]:
+    for result in [read_bw, read_iops, max_bw, dali_results, metadata]:
         try:
             total_systems = max(result.keys())
             systems = sorted(result.keys())
@@ -150,6 +162,7 @@ def main(directory, baseline=None, custom_baseline=None, tolerance=0,
                                      max_bw,
                                      bytes_sizes,
                                      dali_results,
+                                     metadata,
                                      system_num)
         final_dictionary_output['systems'][str(system_num)] = aggregate.json
         if verbose:
