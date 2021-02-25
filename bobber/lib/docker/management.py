@@ -2,6 +2,7 @@
 import docker
 import os
 import sys
+from bobber.lib.exit_codes import DOCKER_BUILD_FAILURE
 from bobber.lib.system.file_handler import update_log
 from typing import NoReturn, Optional
 
@@ -170,7 +171,7 @@ class DockerManager:
             if 'error' in line.keys():
                 print(line['error'].rstrip())
                 print(f'{tag} build failed. See error above.')
-                sys.exit(-1)
+                sys.exit(DOCKER_BUILD_FAILURE)
             if 'stream' in line.keys() and line['stream'].strip() != '':
                 print(line['stream'].rstrip())
         print(f'{tag} successfully built')
