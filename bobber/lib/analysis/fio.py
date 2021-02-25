@@ -1,10 +1,26 @@
 # SPDX-License-Identifier: MIT
 import re
 from bobber.lib.analysis.common import fio_command_details
+from typing import Tuple
 
 
-def clean_iops(iops):
-    # Convert the IOPS into an equivalent operations/second result.
+def clean_iops(iops: str) -> float:
+    """
+    Convert the IOPS into an equivalent operations/second result.
+
+    Parse the IOPS value from the input string and convert the value from a
+    larger unit to an equivalent operations/second, if applicable.
+
+    Parameters
+    ----------
+    iops : str
+        A ``string`` of the number of operations/second and resulting unit.
+
+    Returns
+    -------
+    float
+        Returns a ``float`` of the final IOPS value in operations/second.
+    """
     number = float(re.findall(r'\d+', iops)[0])
     if 'G' in iops:
         ops_per_second = number * 1e9
@@ -17,8 +33,23 @@ def clean_iops(iops):
     return ops_per_second
 
 
-def clean_bw(bandwidth):
-    # Convert the bandwidth into an equivalent bytes/second result.
+def clean_bw(bandwidth: str) -> float:
+    """
+    Convert the bandwidth into an equivalent bytes/second result.
+
+    Parse the bandwidth value from the input string and convert the value from
+    a larger unit to an equivalent operations/second, if applicable.
+
+    Parameters
+    ----------
+    bandwidth : str
+        A ``string`` of the bandwidth and unit from the test.
+
+    Returns
+    -------
+    float
+        Returns a ``float`` of the final bandwidth in bytes/second.
+    """
     number = float(re.findall(r'(\d+(?:\.\d+)?)', bandwidth)[0])
     if 'GB/s' in bandwidth:
         bytes_per_second = number * 1e9
@@ -31,7 +62,38 @@ def clean_bw(bandwidth):
     return bytes_per_second
 
 
-def fio_bw_results(log_contents, systems, string_to_match, log):
+def fio_bw_results(log_contents: str, systems: int, string_to_match: str,
+                   log: str) -> list:
+    """
+    Capture the bandwidth results from the log files.
+
+    Search the log for any lines containing a bandwidth value and return a
+    final list of all of the parsed values.
+
+    Parameters
+    ----------
+    log_contents : str
+        A ``string`` of the contents from an FIO log file.
+    systems : int
+        An ``integer`` of the number of systems used during the current test.
+    string_to_match : str
+        A regex ``string`` of the line to pull from the log file to match any
+        bandwidth lines.
+    log : str
+        A ``string`` of the name of the log file being parsed.
+
+    Returns
+    -------
+    list
+        Returns a ``list`` of ``floats`` representing all of the bandwidth
+        values parsed from the log.
+
+    Raises
+    ------
+    ValueError
+        Raises a ``ValueError`` if the bandwidth cannot be parsed from the log
+        file.
+    """
     final_bw = []
 
     match = re.findall(string_to_match, log_contents)
@@ -50,7 +112,39 @@ def fio_bw_results(log_contents, systems, string_to_match, log):
     return final_bw
 
 
-def fio_iops_results(log_contents, systems, string_to_match, log):
+def fio_iops_results(log_contents: str, systems: int, string_to_match: str,
+                     log: str) -> list:
+    """
+    Capture the IOPS results from the log files.
+
+    Search the log for any lines containing IOPS values and return a final list
+    of all of the parsed values. The FIO IOPS tests print an extra line for
+    multi-node tests and are subsequently dropped.
+
+    Parameters
+    ----------
+    log_contents : str
+        A ``string`` of the contents from an FIO log file.
+    systems : int
+        An ``integer`` of the number of systems used during the current test.
+    string_to_match : str
+        A regex ``string`` of the line to pull from the log file to match any
+        IOPS lines.
+    log : str
+        A ``string`` of the name of the log file being parsed.
+
+    Returns
+    -------
+    list
+        Returns a ``list`` of ``floats`` representing all of the IOPS values
+        parsed from the log.
+
+    Raises
+    ------
+    ValueError
+        Raises a ``ValueError`` if the IOPS cannot be parsed from the log
+        file.
+    """
     final_iops = []
 
     match = re.findall(string_to_match, log_contents)
@@ -73,8 +167,33 @@ def fio_iops_results(log_contents, systems, string_to_match, log):
     return final_iops
 
 
-def parse_fio_bw_file(log_files, systems, read_system_results,
-                      write_system_results):
+def parse_fio_bw_file(log_files: list, systems: int, read_system_results: dict,
+                      write_system_results: dict) -> Tuple[dict, dict, dict,
+                                                           dict]:
+    """
+    Parse the FIO bandwidth results and test parameters.
+
+    Search all log files for read and write parameters used to initiate the
+    test and the final results and return the resulting objects.
+
+    Parameters
+    ----------
+    log_files : list
+        A ``list`` of ``strings`` of the filenames of all FIO bandwidth logs in
+        the results directory.
+    systems : int
+        An ``integer`` of the number of systems used during the current test.
+    read_system_results : dict
+        A ``dictionary`` of the final read results for N-systems.
+    write_system_results : dict
+        A ``dictionary`` of the final write results for N-systems.
+
+    Returns
+    -------
+    tuple
+        A ``tuple`` of four dictionaries containing the read results, write
+        results, read parameters, and write parameters, respectively.
+    """
     read_params, write_params = None, None
 
     for log in log_files:
@@ -92,8 +211,34 @@ def parse_fio_bw_file(log_files, systems, read_system_results,
     return read_system_results, write_system_results, read_params, write_params
 
 
-def parse_fio_iops_file(log_files, systems, read_system_results,
-                        write_system_results):
+def parse_fio_iops_file(log_files: list, systems: int,
+                        read_system_results: dict,
+                        write_system_results: dict) -> Tuple[dict, dict, dict,
+                                                             dict]:
+    """
+    Parse the FIO IOPS results and test parameters.
+
+    Search all log files for read and write parameters used to initiate the
+    test and the final results and return the resulting objects.
+
+    Parameters
+    ----------
+    log_files : list
+        A ``list`` of ``strings`` of the filenames of all FIO IOPS logs in the
+        results directory.
+    systems : int
+        An ``integer`` of the number of systems used during the current test.
+    read_system_results : dict
+        A ``dictionary`` of the final read results for N-systems.
+    write_system_results : dict
+        A ``dictionary`` of the final write results for N-systems.
+
+    Returns
+    -------
+    tuple
+        A ``tuple`` of four dictionaries containing the read results, write
+        results, read parameters, and write parameters, respectively.
+    """
     read_params, write_params = None, None
 
     for log in log_files:

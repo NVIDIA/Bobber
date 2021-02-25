@@ -15,13 +15,50 @@ from bobber.lib.analysis.fio import parse_fio_bw_file, parse_fio_iops_file
 from bobber.lib.analysis.meta import parse_meta_file
 from bobber.lib.analysis.nccl import parse_nccl_file
 from bobber.lib.analysis.table import display_table
+from typing import NoReturn, Optional, Tuple
 
 
-def get_files(directory):
+def get_files(directory: str) -> list:
+    """
+    Read all log files.
+
+    Given an input directory as a string, read all log files and return the
+    filenames including the directory as a list.
+
+    Parameters
+    ----------
+    directory : str
+        A ``string`` pointing to the results directory.
+
+    Returns
+    -------
+    list
+        Returns a ``list`` of ``strings`` of the paths to each log file in the
+        results directory.
+    """
     return glob(join(directory, '*.log'))
 
 
-def parse_fio_bw(log_files):
+def parse_fio_bw(log_files: list) -> Tuple[dict, dict, dict, dict]:
+    """
+    Parse all FIO bandwidth logs.
+
+    Find each FIO bandwidth log in the results directory and parse the read and
+    write results and parameters from each log for all system counts.
+
+    Parameters
+    ----------
+    log_files : list
+        A ``list`` of ``strings`` of the paths to each log file in the results
+        directory.
+
+    Returns
+    -------
+    tuple
+        A ``tuple`` of four dictionaries containing the read results, write
+        results, read parameters, and write parameters, respectively for all
+        system counts.
+    """
     read_sys_results = defaultdict(list)
     write_sys_results = defaultdict(list)
     read_params, write_params = None, None
@@ -37,7 +74,26 @@ def parse_fio_bw(log_files):
     return read_sys_results, write_sys_results, read_params, write_params
 
 
-def parse_fio_iops(log_files):
+def parse_fio_iops(log_files: list) -> Tuple[dict, dict, dict, dict]:
+    """
+    Parse all FIO IOPS logs.
+
+    Find each FIO IOPS log in the results directory and parse the read and
+    write results and parameters from each log for all system counts.
+
+    Parameters
+    ----------
+    log_files : list
+        A ``list`` of ``strings`` of the paths to each log file in the results
+        directory.
+
+    Returns
+    -------
+    tuple
+        A ``tuple`` of four dictionaries containing the read results, write
+        results, read parameters, and write parameters, respectively for all
+        system counts.
+    """
     read_sys_results = defaultdict(list)
     write_sys_results = defaultdict(list)
     read_params, write_params = None, None
@@ -54,7 +110,25 @@ def parse_fio_iops(log_files):
     return read_sys_results, write_sys_results, read_params, write_params
 
 
-def parse_nccl(log_files):
+def parse_nccl(log_files: list) -> Tuple[dict, dict]:
+    """
+    Parse all NCCL logs.
+
+    Find the maximum bus bandwidth and resulting byte size for all NCCL files
+    for all system counts.
+
+    Parameters
+    ----------
+    log_files : list
+        A ``list`` of ``strings`` of the paths to each log file in the results
+        directory.
+
+    Returns
+    -------
+    tuple
+        Returns a ``tuple`` of (``dict``, ``dict``) representing the maximum
+        bus bandwidth and corresponding byte size for all system counts.
+    """
     bw_results = defaultdict(list)
     bytes_results = defaultdict(list)
 
@@ -67,7 +141,25 @@ def parse_nccl(log_files):
     return bw_results, bytes_results
 
 
-def parse_dali(log_files):
+def parse_dali(log_files: list) -> dict:
+    """
+    Parse all DALI logs.
+
+    Parse the bandwidth and throughput for all image types and sizes from all
+    DALI log files.
+
+    Parameters
+    ----------
+    log_files : list
+        A ``list`` of ``strings`` of the paths to each log file in the results
+        directory.
+
+    Returns
+    -------
+    dict
+        Returns a ``dictionary`` of the throughput and bandwidth for all system
+        counts.
+    """
     results_dict = {}
 
     dali_logs_by_systems = divide_logs_by_systems(log_files, 'dali')
@@ -77,7 +169,25 @@ def parse_dali(log_files):
     return results_dict
 
 
-def parse_meta(log_files):
+def parse_meta(log_files: list) -> dict:
+    """
+    Parse all metadata logs.
+
+    Parse the minimum, maximum, and mean values for all operations in the
+    metadata log files.
+
+    Parameters
+    ----------
+    log_files : list
+        A ``list`` of ``strings`` of the paths to each log file in the results
+        directory.
+
+    Returns
+    -------
+    dict
+        Returns a ``dictionary`` of the results from various metadata
+        operations for all system counts.
+    """
     results_dict = {}
 
     meta_logs_by_systems = divide_logs_by_systems(log_files, 'stg_meta')
@@ -87,29 +197,20 @@ def parse_meta(log_files):
     return results_dict
 
 
-def verify_template(template):
-    print('Analyzing the template file for accuracy...')
-    print()
-    print(template)
-    prompt = 'Are the above details accurate based on the passed logs? [y/n]: '
+def save_json(final_dictionary_output: dict, filename: str) -> NoReturn:
+    """
+    Save results to a file.
 
-    while True:
-        try:
-            response = input(prompt)
-        except KeyboardInterrupt:
-            print('Keyboard interrupt - exiting...')
-            sys.exit(SUCCESS)
-        if response.lower().strip() == 'y':
-            break
-        elif response.lower().strip() == 'n':
-            print()
-            print('Please update the template file located in '
-                  'analysis/template.yaml and run again.')
-            print('Exiting...')
-            sys.exit(SUCCESS)
+    Save the final JSON data to a file for future reference. If the filename is
+    not specified, create one using the current date and timestamp.
 
-
-def save_json(final_dictionary_output, filename):
+    Parameters
+    ----------
+    final_dictionary_output : dict
+        A ``dictionary`` of the final JSON output to save.
+    filename : str
+        A ``string`` of the filename to write the JSON data to.
+    """
     if not filename:
         stamp = datetime.now()
         filename = (f'bobber_results_{stamp.date()}_{stamp.hour}.'
@@ -119,8 +220,45 @@ def save_json(final_dictionary_output, filename):
         print(f'JSON data saved to {filename}')
 
 
-def main(directory, baseline=None, custom_baseline=None, tolerance=0,
-         verbose=False, override_version_check=False, json_filename=None):
+def main(directory: str,
+         baseline: Optional[str] = None,
+         custom_baseline: Optional[str] = None,
+         tolerance: Optional[int] = 0,
+         verbose: Optional[bool] = False,
+         override_version_check: Optional[bool] = False,
+         json_filename: Optional[str] = None) -> NoReturn:
+    """
+    Parse all results on a per-system level.
+
+    Read all log files from a results directory and iterate through the results
+    on a per-system level. The results displayed are of the aggregate value for
+    each system count.
+
+    A baseline can be optionally included to compare the results in the output
+    directory against pre-configured results to verify performance meets
+    desired levels.
+
+    Parameters
+    ----------
+    directory : str
+        A ``string`` of the directory where results are located.
+    baseline : str (optional)
+        A ``string`` representing the key from the included baselines to
+        compare results to.
+    custom_baseline : str (optional)
+        A ``string`` of the filename to a custom YAML config file to read and
+        compare results to.
+    tolerance : int (optional)
+        An ``integer`` of the tolerance as a percentage below the baseline to
+        allow results to still be marked as passing.
+    verbose : bool (optional)
+        A ``boolean`` that prints additional textual output when `True`.
+    override_version_check : bool (optional)
+        A ``boolean`` which skips checking the Bobber version tested when
+        `True`.
+    json_filename : str (optional)
+        A ``string`` of the filename to save JSON data to.
+    """
     final_dictionary_output = {'systems': {}}
 
     log_files = get_files(directory)

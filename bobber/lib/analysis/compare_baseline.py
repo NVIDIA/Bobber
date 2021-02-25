@@ -4,6 +4,7 @@ from bobber.lib.constants import BASELINES
 from bobber.lib.exit_codes import BASELINE_FAILURE
 from bobber.lib.analysis.common import bcolors
 from bobber.lib.system.file_handler import read_yaml
+from typing import Optional, Tuple
 
 
 # Map the dicitonary keys in the baseline to human-readable names.
@@ -15,7 +16,31 @@ TEST_MAPPING = {
 }
 
 
-def metric_passes(expected, got, tolerance):
+def metric_passes(expected: float, got: float, tolerance: int) -> bool:
+    """
+    Determine if a test result meets a particular threshold.
+
+    Compares the parsed value with the requested baseline for the same test and
+    return a boolean of whether or not it is greater than expected. If a
+    tolerance is passed, any value that is N-percent or higher below the
+    requested tolerance of N will still be marked as passing.
+
+    Parameters
+    ----------
+    expected : float
+        A ``float`` of the baseline value to compare against.
+    got : float
+        A ``float`` of the test result that was parsed.
+    tolerance : int
+        An ``int`` of the percentage below the threshold to still mark as
+        passing.
+
+    Returns
+    -------
+    bool
+        Returns a ``boolean`` which evaluates to `True` when the parsed value
+        is greater than the baseline and `False` otherwise.
+    """
     if tolerance > 0:
         # If user passes a 5% tolerance, multiply the expected value by 5% less
         # than current value to get the tolerance.
@@ -26,7 +51,28 @@ def metric_passes(expected, got, tolerance):
         return False
 
 
-def result_text(result, failures):
+def result_text(result: bool, failures: int) -> Tuple[str, int]:
+    """
+    Color-code the result output.
+
+    If the result passes the threshold, it will be marked as PASSing in green
+    text. Otherwise, it will be marked as FAILing in red text.
+
+    Parameters
+    ----------
+    result : bool
+        A ``boolean`` which evaluates to `True` when the value meets the
+        threshold and `False` if not.
+    failures : int
+        An ``integer`` of the number of results that have not met the
+        threshold.
+
+    Returns
+    -------
+    tuple
+        Returns a ``tuple`` of (``str``, ``int``) representing the color-coded
+        text and the number of failures found, respectively.
+    """
     if result:
         output = f'{bcolors.PASS}PASS{bcolors.ENDC}'
     else:
@@ -35,7 +81,35 @@ def result_text(result, failures):
     return output, failures
 
 
-def evaluate_fio(baselines, results, test_name, failures, tolerance):
+def evaluate_fio(baselines: dict, results: dict, test_name: str, failures: int,
+                 tolerance: int) -> int:
+    """
+    Evaluate the fio test results against the baseline.
+
+    Determine if the fio test results meet the expected threshold and display
+    the outcome with appropriate units.
+
+    Parameters
+    ----------
+    baselines : dict
+        A ``dictionary`` of the baseline to compare results against.
+    results : dict
+        A ``dictionary`` of the parsed results.
+    test_name : str
+        A ``string`` of the name of the test being parsed.
+    failures : int
+        An ``integer`` of the number of results that have not met the
+        threshold.
+    tolerance : int
+        An ``int`` of the percentage below the threshold to still mark as
+        passing.
+
+    Returns
+    -------
+    int
+        Returns an ``integer`` of the number of results that have not met the
+        threshold.
+    """
     for test, value in baselines.items():
         if test_name == 'bandwidth':
             unit = '(GB/s)'
@@ -54,7 +128,33 @@ def evaluate_fio(baselines, results, test_name, failures, tolerance):
     return failures
 
 
-def evaluate_nccl(baseline, results, failures, tolerance):
+def evaluate_nccl(baseline: dict, results: dict, failures: int,
+                  tolerance: int) -> int:
+    """
+    Evaluate the NCCL test results against the baseline.
+
+    Determine if the NCCL test results meet the expected threshold and display
+    the outcome with appropriate units.
+
+    Parameters
+    ----------
+    baselines : dict
+        A ``dictionary`` of the baseline to compare results against.
+    results : dict
+        A ``dictionary`` of the parsed results.
+    failures : int
+        An ``integer`` of the number of results that have not met the
+        threshold.
+    tolerance : int
+        An ``int`` of the percentage below the threshold to still mark as
+        passing.
+
+    Returns
+    -------
+    int
+        Returns an ``integer`` of the number of results that have not met the
+        threshold.
+    """
     print('  NCCL Max Bus Bandwidth (GB/s)')
     expected = baseline['max_bus_bw']
     got = results['nccl']['max_bus_bw']
@@ -66,7 +166,35 @@ def evaluate_nccl(baseline, results, failures, tolerance):
     return failures
 
 
-def evaluate_dali(baselines, results, test_name, failures, tolerance):
+def evaluate_dali(baselines: dict, results: dict, test_name: str,
+                  failures: int, tolerance: int) -> int:
+    """
+    Evaluate the DALI test results against the baseline.
+
+    Determine if the DALI test results meet the expected threshold and display
+    the outcome with appropriate units.
+
+    Parameters
+    ----------
+    baselines : dict
+        A ``dictionary`` of the baseline to compare results against.
+    results : dict
+        A ``dictionary`` of the parsed results.
+    test_name : str
+        A ``string`` of the name of the test being parsed.
+    failures : int
+        An ``integer`` of the number of results that have not met the
+        threshold.
+    tolerance : int
+        An ``int`` of the percentage below the threshold to still mark as
+        passing.
+
+    Returns
+    -------
+    int
+        Returns an ``integer`` of the number of results that have not met the
+        threshold.
+    """
     for test, value in baselines.items():
         print(f'  DALI {test} (images/second)')
         expected = value
@@ -79,7 +207,28 @@ def evaluate_dali(baselines, results, test_name, failures, tolerance):
     return failures
 
 
-def evaluate_test(baseline, results, system_count, tolerance):
+def evaluate_test(baseline: dict, results: dict, system_count: int,
+                  tolerance: int):
+    """
+    Evaluate all tests for N-nodes and compare against the baseline.
+
+    The comparison verifies results meet a certain threshold for each system
+    count in a sweep. For example, in an 8-node sweep, compare the one-node
+    results to the baseline before comparing the two-node results and so on.
+
+    Parameters
+    ----------
+    baseline : dict
+        A ``dictionary`` of the baseline to compare results against.
+    results : dict
+        A ``dictionary`` of the parsed results.
+    system_count : int
+        An ``int`` of the number of systems that were tested for each
+        comparison level.
+    tolerance : int
+        An ``int`` of the percentage below the threshold to still mark as
+        passing.
+    """
     failures = 0
 
     for test_name, test_values in baseline.items():
@@ -105,7 +254,33 @@ def evaluate_test(baseline, results, system_count, tolerance):
         sys.exit(BASELINE_FAILURE)
 
 
-def compare_baseline(results, baseline, tolerance, custom=False):
+def compare_baseline(results: dict, baseline: str, tolerance: int,
+                     custom: Optional[bool] = False):
+    """
+    Compare a baseline against parsed results.
+
+    Pull the requested baseline either from a custom YAML file or one of the
+    existing baselines included with the application and compare against the
+    parsed results by checking if the parsed result is greater than the
+    baseline on a per-system basis.
+
+    Parameters
+    ----------
+    results : dict
+        A ``dictionary`` of the complete set of results from a parsed
+        dictionary.
+    baseline : str
+        A ``string`` of the baseline to use. This either represents a key from
+        the included baselines, or a filename to a custom YAML config file to
+        read.
+    tolerance : int
+        An ``int`` of the tolerance as a percentage below the baseline to allow
+        results to still be marked as passing.
+    custom : bool (optional)
+        An optional ``boolean`` that, when `True`, will read in a baseline
+        passed from a YAML file. If `False`, it will compare against an
+        included baseline.
+    """
     print('=' * 80)
     print('Baseline assessment')
     if custom:

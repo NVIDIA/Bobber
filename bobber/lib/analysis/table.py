@@ -3,6 +3,7 @@ import numpy as np
 import operator
 from bobber.lib.analysis.common import bcolors
 from tabulate import tabulate
+from typing import NoReturn, Tuple
 
 
 FIO_READ_BW = f'{bcolors.BOLD}FIO Read (GB/s) - 1MB BS{bcolors.ENDC}'
@@ -28,24 +29,82 @@ DALI_TF_LG_BW = (f'{bcolors.BOLD}DALI TFRecord 3840x2160 bandwidth '
                  f'(GB/s){bcolors.ENDC}')
 
 
-def bytes_to_gb(number):
+def bytes_to_gb(number: float) -> float:
+    """
+    Convert bytes to gigabytes.
+
+    Parameters
+    ----------
+    number : float
+        A ``float`` in bytes.
+
+    Returns
+    -------
+    float
+        Returns a ``float`` of the number in gigabytes.
+    """
     return round(number * 1e-9, 3)
 
 
-def iops_to_kiops(number):
+def iops_to_kiops(number: float) -> float:
+    """
+    Convert iops to k-iops.
+
+    Parameters
+    ----------
+    number : float
+        A ``float`` in iops.
+
+    Returns
+    -------
+    float
+        Returns a ``float`` of the number in k-iops.
+    """
     return round(number * 1e-3, 3)
 
 
-def scale(values):
-    # Assuming scale is the calculated slope of the line of best fit divided by
-    # the first value in the results, plus 1.
+def scale(values: list) -> float:
+    """
+    Calculate the scaling factor of results.
+
+    Calculate the scale by determining the slope of the line of best fit and
+    dividing by the first value in the results, plus 1.
+
+    Parameters
+    ----------
+    values : list
+        A ``list`` of ``floats`` to calculate the scale factor for.
+
+    Returns
+    -------
+    float
+        Returns a ``float`` of the scaling factor.
+    """
     x = np.array(range(1, len(values) + 1))
     y = np.array(values)
     slope, _ = np.polyfit(x, y, 1)
     return slope / values[0] + 1.0
 
 
-def fio_bw(results):
+def fio_bw(results: list) -> Tuple[list, list]:
+    """
+    Save the FIO bandwidth read and write results.
+
+    Save the read and write results from the FIO bandwidth tests on an
+    increasing per-system basis with the first element in the list being the
+    column header.
+
+    Parameters
+    ----------
+    results : list
+        A ``list`` of ``dictionaries`` containing all results from the tests.
+
+    Returns
+    -------
+    tuple
+        Returns a ``tuple`` of (``list``, ``list``) containing the read and
+        write bandwidth results, respectively.
+    """
     try:
         read = [FIO_READ_BW] + [bytes_to_gb(result[1]['bandwidth']['read'])
                                 for result in results]
@@ -57,7 +116,25 @@ def fio_bw(results):
         return [read, write]
 
 
-def fio_iops(results):
+def fio_iops(results: list) -> Tuple[list, list]:
+    """
+    Save the FIO IOPS read and write results.
+
+    Save the read and write results from the FIO IOPS tests on an increasing
+    per-system basis with the first element in the list being the column
+    header.
+
+    Parameters
+    ----------
+    results : list
+        A ``list`` of ``dictionaries`` containing all results from the tests.
+
+    Returns
+    -------
+    tuple
+        Returns a ``tuple`` of (``list``, ``list``) containing the read and
+        write IOPS results, respectively.
+    """
     try:
         read = [FIO_READ_IOP] + [iops_to_kiops(result[1]['iops']['read'])
                                  for result in results]
@@ -69,7 +146,24 @@ def fio_iops(results):
         return [read, write]
 
 
-def nccl(results):
+def nccl(results: list) -> list:
+    """
+    Save the NCCL results.
+
+    Save the maximum bus bandwidth results from the NCCL tests on an increasing
+    per-system basis with the first element in the list being the column
+    header.
+
+    Parameters
+    ----------
+    results : list
+        A ``list`` of dictionaries containing all results from the tests.
+
+    Returns
+    -------
+    list
+        Returns a ``list`` of the NCCL max bus bandwidth results.
+    """
     try:
         nccl = [NCCL] + [round(result[1]['nccl']['max_bus_bw'], 3)
                          for result in results]
@@ -79,7 +173,27 @@ def nccl(results):
         return [nccl]
 
 
-def dali(results):
+def dali(results: list) -> Tuple[list, list, list, list, list, list, list,
+                                 list]:
+    """
+    Save the DALI results.
+
+    Save the throughput and bandwidth results from the DALI tests on an
+    increasing per-system basis with the first element in the list being the
+    column header.
+
+    Parameters
+    ----------
+    results : list
+        A ``list`` of dictionaries containing all results from the tests.
+
+    Returns
+    -------
+    tuple
+        Returns a ``tuple`` of eight ``lists`` containing the throughput
+        followed by bandwidth for small and large standard images, then small
+        and large TFRecords.
+    """
     try:
         img_sm = [DALI_IMG_SM] + [result[1]['dali']['800x600 standard jpg']
                                   ['average images/second']
@@ -116,7 +230,20 @@ def dali(results):
                 tf_lg_bw]
 
 
-def add_scale(data):
+def add_scale(data: list) -> NoReturn:
+    """
+    Add the scaling factor to results.
+
+    Iterate through all results and append the scaling factor to each of the
+    categories, if applicable. Results that have a scaling factor greater than
+    1.9x are marked GREEN, results greater than 1.5 are marked YELLOW, and all
+    other results are RED.
+
+    Parameters
+    ----------
+    data : list
+        A ``list`` of ``lists`` of all categories of results.
+    """
     for subset in data:
         # No results in the data - just the test category name
         if len(subset) < 2:
@@ -139,7 +266,19 @@ def add_scale(data):
         subset += [scale_text]
 
 
-def display_table(json_results):
+def display_table(json_results: dict) -> NoReturn:
+    """
+    Display results in tabular format.
+
+    Find the results on a per-system basis for all categories and display the
+    resulting scaling factor.
+
+    Parameters
+    ----------
+    json_results : dict
+        A ``dictionary`` of the final results that have been parsed from the
+        results directory.
+    """
     data = []
     headers = [f'{bcolors.BOLD}Test{bcolors.ENDC}'] + \
               [f'{bcolors.BOLD}{num} Node(s){bcolors.ENDC}'
