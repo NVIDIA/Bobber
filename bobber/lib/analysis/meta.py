@@ -29,7 +29,8 @@ def pull_stats(summary):
 
 
 def parse_summary(log_contents):
-    summary = re.findall('---------.*-- finished', log_contents, re.DOTALL)
+    summary = re.findall('---------                      .*-- finished',
+                         log_contents, re.DOTALL)
     if len(summary) == 0:
         return None
     # `summary` is a single-element list where the element is a list of all of
