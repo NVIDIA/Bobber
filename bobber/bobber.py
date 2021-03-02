@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 import bobber.lib.docker
 import json
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser, ArgumentTypeError, Namespace
 from copy import copy
 from bobber import __version__
 from bobber.lib.constants import (
@@ -26,6 +26,37 @@ from bobber.lib.analysis import parse_results
 from bobber.lib.system.file_handler import create_directory
 from bobber.lib.tests import run_tests
 from typing import NoReturn
+
+
+def unique_hosts(hosts: str) -> str:
+    """
+    Verify all hosts are unique.
+
+    If more than one host is passed to the hosts parameter, ensure no two hosts
+    are identical as Bobber can't be run concurrently on the same host.
+
+    Parameters
+    ----------
+    hosts : str
+        A ``string`` of the comma-separated hosts from the user, such as
+        'host1,host2,host3,...'
+
+    Returns
+    -------
+    str
+        Returns a ``string`` of the original hosts list if all hosts are
+        unique.
+
+    Raises
+    ------
+    ArgumentTypeError
+        Raises an ``ArgumentTypeError`` if any of the passed hosts are
+        identical.
+    """
+    host_list = hosts.split(',')
+    if len(host_list) != len(list(set(host_list))):
+        raise ArgumentTypeError('Hosts must be unique')
+    return hosts
 
 
 def parse_args(version: str) -> Namespace:
@@ -57,7 +88,8 @@ def parse_args(version: str) -> Namespace:
     commands_parent.add_argument('log_path', metavar='log-path', help='Path '
                                  'used to store log files on the head node')
     commands_parent.add_argument('hosts', help='Comma-separated list of '
-                                 'hostnames or IP addresses')
+                                 'hostnames or IP addresses',
+                                 type=unique_hosts)
     commands_parent.add_argument('--config-path', help='Read a JSON config '
                                  'file with expected parameters and use those '
                                  'values for testing. Ignores all other '
