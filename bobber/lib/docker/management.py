@@ -239,9 +239,10 @@ class DockerManager:
             sys.exit(CONTAINER_NOT_RUNNING)
         bobber = self.client.containers.get('bobber')
         if not self.version_match(bobber):
-            print('Bobber container version mismatch. Kill the running Bobber '
-                  'container with "docker kill bobber" and re-cast a new '
-                  'container with "bobber cast" prior to running any tests.')
+            print('Bobber container version mismatch.')
+            print('Kill the running Bobber container with "docker kill bobber"'
+                  ' and re-cast a new container with "bobber cast" prior to '
+                  'running any tests.')
             sys.exit(CONTAINER_VERSION_MISMATCH)
         result = bobber.exec_run(
             command,
