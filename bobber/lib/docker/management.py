@@ -2,8 +2,14 @@
 import docker
 import os
 import sys
-from bobber.lib.exit_codes import DOCKER_BUILD_FAILURE
+from bobber.__version__ import __version__ as version
+from bobber.lib.exit_codes import (CONTAINER_NOT_RUNNING,
+                                   CONTAINER_VERSION_MISMATCH,
+                                   DOCKER_BUILD_FAILURE,
+                                   DOCKER_COMMUNICATION_ERROR,
+                                   NVIDIA_RUNTIME_ERROR)
 from bobber.lib.system.file_handler import update_log
+from docker.models.containers import Container
 from typing import NoReturn, Optional
 
 
@@ -20,8 +26,14 @@ class DockerManager:
     can be access from other modules without re-instantiating the class.
     """
     def __init__(self) -> NoReturn:
-        self.client = docker.from_env()
-        self.cli = docker.APIClient(timeout=600)
+        try:
+            self.client = docker.from_env()
+            self.cli = docker.APIClient(timeout=600)
+        except docker.errors.DockerException as e:
+            if 'error while fetching server api version' in str(e).lower():
+                print('Error: Could not communicate with the Docker daemon.')
+                print('Ensure Docker is running with "systemctl start docker"')
+                sys.exit(DOCKER_COMMUNICATION_ERROR)
 
     def _build_if_not_built(self, tag: str, bobber_version: str) -> NoReturn:
         """
@@ -95,32 +107,39 @@ class DockerManager:
         runtime = None
         if not ignore_gpu:
             runtime = 'nvidia'
-        self.client.containers.run(
-            tag,
-            'bash -c "/usr/sbin/sshd; sleep infinity"',
-            detach=True,
-            auto_remove=True,
-            ipc_mode='host',
-            name='bobber',
-            network_mode='host',
-            privileged=True,
-            shm_size='1G',
-            runtime=runtime,
-            ulimits=[
-                docker.types.Ulimit(name='memlock',
-                                    soft=-1,
-                                    hard=-1),
-                docker.types.Ulimit(name='stack',
-                                    soft=67108864,
-                                    hard=67108864)
-            ],
-            volumes={
-                f'{storage_path}': {
-                    'bind': '/mnt/fs_under_test',
-                    'mode': 'rw'
+        try:
+            self.client.containers.run(
+                tag,
+                'bash -c "/usr/sbin/sshd; sleep infinity"',
+                detach=True,
+                auto_remove=True,
+                ipc_mode='host',
+                name='bobber',
+                network_mode='host',
+                privileged=True,
+                shm_size='1G',
+                runtime=runtime,
+                ulimits=[
+                    docker.types.Ulimit(name='memlock',
+                                        soft=-1,
+                                        hard=-1),
+                    docker.types.Ulimit(name='stack',
+                                        soft=67108864,
+                                        hard=67108864)
+                ],
+                volumes={
+                    f'{storage_path}': {
+                        'bind': '/mnt/fs_under_test',
+                        'mode': 'rw'
+                    }
                 }
-            }
-        )
+            )
+        except docker.errors.APIError as e:
+            if 'Unknown runtime specified nvidia' in str(e):
+                print('NVIDIA container runtime not found. Ensure the latest '
+                      'nvidia-docker libraries and NVIDIA drivers are '
+                      'installed.')
+                sys.exit(NVIDIA_RUNTIME_ERROR)
 
     def export(self, bobber_version: str) -> NoReturn:
         """
@@ -214,7 +233,16 @@ class DockerManager:
         log_file : string (Optional)
             A ``string`` of the path and filename to optionally save output to.
         """
+        if not self.running:
+            print('Bobber container not running. Launch a container with '
+                  '"bobber cast" prior to running any tests.')
+            sys.exit(CONTAINER_NOT_RUNNING)
         bobber = self.client.containers.get('bobber')
+        if not self.version_match(bobber):
+            print('Bobber container version mismatch. Kill the running Bobber '
+                  'container with "docker kill bobber" and re-cast a new '
+                  'container with "bobber cast" prior to running any tests.')
+            sys.exit(CONTAINER_VERSION_MISMATCH)
         result = bobber.exec_run(
             command,
             demux=False,
@@ -234,3 +262,46 @@ class DockerManager:
                 print(result.output)
             except StopIteration:
                 break
+
+    def version_match(self, container: Container) -> bool:
+        """
+        Determine if the Bobber container version matches the application.
+
+        The running Bobber container version must match the local Bobber
+        application version to ensure all tests will function properly.
+
+        Parameters
+        ----------
+        container : Container
+            A ``Container`` object representing the running Bobber image.
+
+        Returns
+        -------
+        bool
+            Returns `True` when the versions match and `False` when not.
+        """
+        if f'nvidia/bobber:{version}' not in container.image.tags:
+            return False
+        return True
+
+    @property
+    def running(self) -> bool:
+        """
+        Determine if the Bobber container is running on the system.
+
+        Check to see if the current version of the Bobber container is running
+        on the local machine and return the status. This method can be used to
+        determine whether or not to run a command that depends on the container
+        being launched.
+
+        Returns
+        -------
+        bool
+            Returns `True` when the container is running and `False` when not.
+        """
+        try:
+            bobber = self.client.containers.get('bobber')
+        except docker.errors.NotFound:
+            return False
+        else:
+            return True
