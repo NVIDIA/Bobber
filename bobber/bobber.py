@@ -158,6 +158,10 @@ def parse_args(version: str) -> Namespace:
                                  'supported - stg-bw and stg-iops). If '
                                  'providing more than one flag, wrap entire '
                                  'set in quotes')
+    commands_parent.add_argument('--pause', help='Pause between tests for N '
+                                 'seconds to ensure any activity is finished '
+                                 'before the next test begins. Defaults to 0 '
+                                 '(no pause).', type=int, default=0)
 
     # Create the test initiation commands with the general options above
     commands.add_parser(RUN_ALL, help='Run all tests',
