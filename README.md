@@ -27,22 +27,10 @@ but other Linux-based platforms with NVIDIA GPUs might also work. While running
 any of the tests listed at the bottom of this document, look at the `--help`
 output to see if any values need to be changed for other systems.
 
-## Downloading the binary
-Bobber features a Python wheel which can be downloaded from GitHub to easily
-install the application on a range of machines. Go to the [releases](https://github.com/NVIDIA/Bobber/releases)
-page on the repository and find the latest release. Look for the "Binary"
-section in the release notes and copy the link to the latest wheel.
-
-Using `wget`, download the binary using the address from the previous step to all
-remote machines which will be tested, for example:
-
-```bash
-wget https://github.com/NVIDIA/Bobber/releases/download/v6.1.1/nvidia_bobber-6.1.1-py3-none-any.whl
-```
-
 ## Python dependency installation
-The Python wheel can be installed with PIP3 for Python3 which will also install
-all required dependencies.
+Bobber features a Python wheel which can be installed using PIP3 for Python3 and
+`nvidia-pyindex`. Installing the wheel will also install all required
+dependencies.
 
 First, install PIP3 if not already installed on all of the machines that will be
 tested:
@@ -52,12 +40,14 @@ sudo apt update
 sudo apt install -y python3-pip
 ```
 
-Next, install the Python wheel globally which was downloaded during the previous
-step on all nodes. By installing globally with `sudo`, the application will be
-available in all paths to all users.
+Next, install `nvidia-pyindex` and `nvidia-bobber` globally on all nodes. By
+installing globally with `sudo`, the application will be available in all paths
+to all users, though it can also be installed in a `virtualenv` or `conda`
+environment.
 
 ```bash
-sudo pip3 install nvidia_bobber-*-none-any.whl
+sudo pip3 install nvidia-pyindex
+sudo pip3 install nvidia-bobber
 ```
 
 The installation can be verified with `pip3 freeze` after completion:
@@ -92,6 +82,21 @@ positional arguments:
 
 optional arguments:
   -h, --help     show this help message and exit
+```
+
+### Installing the binary directly (optional)
+`nvidia-pyindex` is updated monthly to include the latest version of all wheels.
+In some scenarios, Bobber could be updated well before the next `nvidia-pyindex`
+release. To install the latest release directly, go to the
+[releases](https://github.com/NVIDIA/Bobber/releases) page on the repository and
+find the latest release. Look for the "Binary" section in the release notes and
+copy the link to the latest wheel.
+
+Using `pip3`, install the binary using the address from the previous step to all
+remote machines which will be tested, for example:
+
+```bash
+pip3 install https://github.com/NVIDIA/Bobber/releases/download/v6.1.1/nvidia_bobber-6.1.1-py3-none-any.whl
 ```
 
 ## Build Bobber container (includes OSU Tests, NCCL Tests, fio, mdtest, DALI RN50 Pipeline, and the base NGC TensorFlow container)
