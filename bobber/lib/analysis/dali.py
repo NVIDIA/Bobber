@@ -2,11 +2,51 @@
 import re
 
 
-def _clean_sizes(sizes):
+def _clean_sizes(sizes: list) -> list:
+    """
+    Remove all text from sizes.
+
+    The parser to capture sizes of various objects includes 'in bytes: ' in the
+    string which should be stripped, leaving only numbers.
+
+    Parameters
+    ----------
+    sizes : list
+        A ``list`` of ``strings`` of sizes of various objects.
+
+    Returns
+    -------
+    list
+        Returns a ``list`` of ``integers`` of sizes of various objects.
+    """
     return [int(size.replace('in bytes: ', '')) for size in sizes]
 
 
-def _size_parsing(log_contents):
+def _size_parsing(log_contents: str) -> dict:
+    """
+    Capture the image and directory size for image data.
+
+    Parse the image and directory size for all images generated using
+    Imageinary. It is assumed that the image and directory size are identical
+    for both the TFRecord and standard JPEG images of similar sizes.
+
+    Parameters
+    ----------
+    log_contents : str
+        A ``string`` of the contents from a DALI log file.
+
+    Returns
+    -------
+    dict
+        Returns a ``dictionary`` of image size information for all image sizes
+        and formats.
+
+    Raises
+    ------
+    ValueError
+        Raises a ``ValueError`` if the log file does not contain size
+        information.
+    """
     results_sub_dict = {
         'image size': 0,
         'size unit': 'B',
@@ -47,14 +87,50 @@ def _size_parsing(log_contents):
     return results
 
 
-def _average(input_list):
+def _average(input_list: list) -> float:
+    """
+    Find the average of a list.
+
+    Given a list of numbers, calculate the average of all values in the list.
+    If the list is empty, default to 0.0.
+
+    Parameters
+    ----------
+    input_list : list
+        A ``list`` of ``floats`` to find an average of.
+
+    Returns
+    -------
+    float
+        Returns a ``float`` of the average value of the list.
+    """
     try:
         return float(sum(input_list) / len(input_list))
     except ZeroDivisionError:
         return 0.0
 
 
-def _update_results(image_type_match, results):
+def _update_results(image_type_match: dict, results: list) -> dict:
+    """
+    Update image dictionary with throughput and bandwidth.
+
+    Find the minimum and average throughput and bandwdith for a particular
+    image size and type by processing a list of all corresponding results.
+
+    Parameters
+    ----------
+    image_type_match : dict
+        A ``dictionary`` of the throughput and bandwidth for a particular image
+        size and type.
+    results : list
+        A ``list`` of ``floats`` representing results from the experiment runs.
+
+    Returns
+    -------
+    dict
+        An updated ``dictionary`` of the throughput and bandwidth for a
+        particular image size and type.
+    """
     size = image_type_match['image size']
     image_type_match['min images/second'] = min(results)
     image_type_match['average images/second'] = _average(results)
@@ -63,7 +139,40 @@ def _update_results(image_type_match, results):
     return image_type_match
 
 
-def _result_parsing(log_contents, systems, image_results, log_file):
+def _result_parsing(log_contents: str, systems: int, image_results: dict,
+                    log_file: str) -> dict:
+    """
+    Parse the throughput results from the log file.
+
+    Given a log file, find all of the results for each of the four test runs
+    including both standard JPEG and TFRecord formats for 800x600 and 4K
+    images. Each section starts with 'RUN 1/1' and runs for 11 epochs before
+    printing 'OK' once complete. The result sections are in a strict order,
+    allowing us to deterministically match results with the corresponding
+    image size and type:
+      0: 800x600 Standard File Read
+      1: 3840x2160 Standard File Read
+      2: 800x600 TFRecord
+      3: 3840x2160 TFRecord
+
+    Parameters
+    ----------
+    log_contents : str
+        A ``string`` of the contents from a DALI log file.
+    systems : int
+        An ``integer`` of the number of systems used during the current test.
+    image_results : dict
+        A ``dictionary`` of image size information for all image sizes and
+        formats.
+    log_file : str
+        A ``string`` of the name of the log file being parsed.
+
+    Returns
+    -------
+    dict
+        Returns an updated ``dictionary`` of image size information for all
+        image sizes and formats.
+    """
     # The result sections are in a strict order, allowing us to
     # deterministically match results with the corresponding image size and
     # type:
@@ -112,7 +221,27 @@ def _result_parsing(log_contents, systems, image_results, log_file):
     return image_results
 
 
-def _combine_results(results, systems):
+def _combine_results(results: list, systems: int) -> dict:
+    """
+    Aggregate all results for N-systems.
+
+    Find the average throughput, bandwidth, and size for all iterations
+    combined and create a single object which can be used to easily reference
+    results.
+
+    Parameters
+    ----------
+    results : list
+        A ``list`` of ``dicts`` for all results from a particular test.
+    systems : int
+        An ``integer`` of the number of systems used during the current test.
+
+    Returns
+    -------
+    dict
+        Returns a ``dictionary`` of the final aggregate results for all
+        iterations for N-nodes for all image types and sizes.
+    """
     system_results = {}
 
     for image_type in ['800x600 standard jpg',
@@ -149,7 +278,31 @@ def _combine_results(results, systems):
     return system_results
 
 
-def parse_dali_file(log_files, systems, results_dict):
+def parse_dali_file(log_files: list, systems: int, results_dict: dict) -> dict:
+    """
+    Parse the aggregate DALI results for N-systems.
+
+    Search through each DALI log for N-systems and find the minimum and average
+    throughput and bandwidth for all four of the DALI tests of various image
+    sizes and formats.
+
+    Parameters
+    ----------
+    log_files : list
+        A ``list`` of ``strings`` where each element is a filepath to a log
+        file.
+    systems : int
+        An ``integer`` of the current number of systems to aggregate results
+        for.
+    results_dict : dict
+        A ``dictionary`` of the aggregate test results for all system counts.
+
+    Returns
+    -------
+    dict
+        An updated ``dictionary`` of the aggregate test results including the
+        newly-parsed results for N-systems.
+    """
     results = []
 
     for log in log_files:
