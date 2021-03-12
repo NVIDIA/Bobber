@@ -4,7 +4,7 @@ from bobber.lib.constants import BASELINES
 from bobber.lib.exit_codes import BASELINE_FAILURE
 from bobber.lib.analysis.common import bcolors
 from bobber.lib.system.file_handler import read_yaml
-from typing import Optional, Tuple
+from typing import NoReturn, Optional, Tuple
 
 
 # Map the dicitonary keys in the baseline to human-readable names.
@@ -111,6 +111,8 @@ def evaluate_fio(baselines: dict, results: dict, test_name: str, failures: int,
         threshold.
     """
     for test, value in baselines.items():
+        if test_name not in results.keys():
+            continue
         if test_name == 'bandwidth':
             unit = '(GB/s)'
             expected = value / 1000000000
@@ -155,6 +157,8 @@ def evaluate_nccl(baseline: dict, results: dict, failures: int,
         Returns an ``integer`` of the number of results that have not met the
         threshold.
     """
+    if 'max_bus_bw' not in baseline.keys():
+        return failures
     print('  NCCL Max Bus Bandwidth (GB/s)')
     expected = baseline['max_bus_bw']
     got = results['nccl']['max_bus_bw']
@@ -196,6 +200,8 @@ def evaluate_dali(baselines: dict, results: dict, test_name: str,
         threshold.
     """
     for test, value in baselines.items():
+        if test not in results.keys():
+            continue
         print(f'  DALI {test} (images/second)')
         expected = value
         got = round(results[test]['average images/second'], 3)
@@ -208,7 +214,7 @@ def evaluate_dali(baselines: dict, results: dict, test_name: str,
 
 
 def evaluate_test(baseline: dict, results: dict, system_count: int,
-                  tolerance: int):
+                  tolerance: int, failures: int) -> int:
     """
     Evaluate all tests for N-nodes and compare against the baseline.
 
@@ -228,9 +234,16 @@ def evaluate_test(baseline: dict, results: dict, system_count: int,
     tolerance : int
         An ``int`` of the percentage below the threshold to still mark as
         passing.
-    """
-    failures = 0
+    failures : int
+        An ``integer`` of the number of results that have not met the
+        threshold.
 
+    Returns
+    -------
+    int
+        Returns an ``integer`` of the number of results that have not met the
+        threshold.
+    """
     for test_name, test_values in baseline.items():
         print('-' * 80)
         if test_name in ['bandwidth', 'iops']:
@@ -244,18 +257,11 @@ def evaluate_test(baseline: dict, results: dict, system_count: int,
                                      test_name,
                                      failures,
                                      tolerance)
-
-    if failures > 0:
-        print('-' * 80)
-        print(f'{failures} tests did not meet the suggested criteria!')
-        print('See results above for failed tests and verify setup.')
-        # Throw a non-zero exit status so any tools that read codes will catch
-        # that the baseline was not met.
-        sys.exit(BASELINE_FAILURE)
+    return failures
 
 
 def compare_baseline(results: dict, baseline: str, tolerance: int,
-                     custom: Optional[bool] = False):
+                     custom: Optional[bool] = False) -> NoReturn:
     """
     Compare a baseline against parsed results.
 
@@ -281,6 +287,8 @@ def compare_baseline(results: dict, baseline: str, tolerance: int,
         passed from a YAML file. If `False`, it will compare against an
         included baseline.
     """
+    failures = 0
+
     print('=' * 80)
     print('Baseline assessment')
     if custom:
@@ -299,9 +307,18 @@ def compare_baseline(results: dict, baseline: str, tolerance: int,
             print('Skipping...')
             continue
         print(f' {system_count} System(s)')
-        evaluate_test(baseline_results,
-                      results['systems'][str(system_count)],
-                      system_count,
-                      tolerance)
+        failures = evaluate_test(baseline_results,
+                                 results['systems'][str(system_count)],
+                                 system_count,
+                                 tolerance,
+                                 failures)
+
+    if failures > 0:
+        print('-' * 80)
+        print(f'{failures} test(s) did not meet the suggested criteria!')
+        print('See results above for failed tests and verify setup.')
+        # Throw a non-zero exit status so any tools that read codes will catch
+        # that the baseline was not met.
+        sys.exit(BASELINE_FAILURE)
 
     print('=' * 80)
