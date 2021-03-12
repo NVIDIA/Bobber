@@ -5,7 +5,7 @@ Containerized testing of system components that impact AI workload performance.
 The following requirements must be met to ensure proper functionality of Bobber:
 
   * Operating System: DGX OS 4.99 or newer
-  * NVIDIA DGX Hardware: DGX A100, DGX 2
+  * NVIDIA DGX Hardware: DGX A100, DGX-2
   * GPU Architecture: NVIDIA Ampere or Turing
   * Docker Version: 19.03 or newer
   * CUDA Version: 11.0 or newer
@@ -17,6 +17,10 @@ combinations of the OS, CUDA, and driver versions than those listed above, these
 are the minimum versions that have been tested and verified to work with Bobber.
 Please create an issue if there are any questions on support for different
 requirements.
+
+For running Bobber on non-DGX systems, refer to the
+[non-DGX support doc](docs/non_dgx_support.md) to find the paramaters that need
+to be updated.
 
 For more information on installing and using Docker, view the
 [Docker document](docs/docker.md).
