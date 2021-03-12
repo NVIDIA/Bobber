@@ -10,6 +10,7 @@ RUN_NCCL = 'run-nccl'
 RUN_STG_BW = 'run-stg-bw'
 RUN_STG_IOPS = 'run-stg-iops'
 RUN_STG_META = 'run-stg-meta'
+SYNC = 'sync'
 
 DGX_A100_SINGLE = {
     'gpus': 8,
