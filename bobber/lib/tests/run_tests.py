@@ -10,6 +10,7 @@ from bobber.lib.constants import (
     RUN_STG_META
 )
 from bobber.lib.docker import manager
+from time import sleep
 from typing import NoReturn
 
 
@@ -52,6 +53,9 @@ def run_dali(args: Namespace, bobber_version: str, iteration: int,
                     environment=environment,
                     log_file=dali_log)
 
+    if args.pause > 0:
+        sleep(args.pause)
+
 
 def run_stg_bw(args: Namespace, bobber_version: str, iteration: int,
                hosts: str) -> NoReturn:
@@ -91,6 +95,9 @@ def run_stg_bw(args: Namespace, bobber_version: str, iteration: int,
     manager.execute('tests/fio_multi.sh',
                     environment=environment,
                     log_file=stg_bw_log)
+
+    if args.pause > 0:
+        sleep(args.pause)
 
 
 def run_stg_iops(args: Namespace, bobber_version: str, iteration: int,
@@ -132,6 +139,9 @@ def run_stg_iops(args: Namespace, bobber_version: str, iteration: int,
                     environment=environment,
                     log_file=stg_iops_log)
 
+    if args.pause > 0:
+        sleep(args.pause)
+
 
 def run_stg_meta(args: Namespace, bobber_version: str, iteration: int,
                  hosts: str) -> NoReturn:
@@ -165,6 +175,9 @@ def run_stg_meta(args: Namespace, bobber_version: str, iteration: int,
     manager.execute('tests/mdtest_multi.sh',
                     environment=environment,
                     log_file=stg_meta_log)
+
+    if args.pause > 0:
+        sleep(args.pause)
 
 
 def run_nccl(args: Namespace, bobber_version: str, iteration: int,
@@ -207,6 +220,9 @@ def run_nccl(args: Namespace, bobber_version: str, iteration: int,
     manager.execute('tests/nccl_multi.sh',
                     environment=environment,
                     log_file=nccl_log)
+
+    if args.pause > 0:
+        sleep(args.pause)
 
 
 def kickoff_test(args: Namespace, bobber_version: str, iteration: int,
