@@ -58,14 +58,14 @@ The installation can be verified with `pip3 freeze` after completion:
 
 ```bash
 $ pip3 freeze | grep bobber
-nvidia-bobber==6.1.1
+nvidia-bobber==6.2.0
 ```
 
 Bobber can also be verified by printing the usage statement:
 
 ```
 $ bobber --help
-usage: Bobber Version: 6.1.1 [-h] command ...
+usage: Bobber Version: 6.2.0 [-h] command ...
 
 positional arguments:
   command
@@ -88,19 +88,19 @@ optional arguments:
   -h, --help     show this help message and exit
 ```
 
-### Installing the binary directly (optional)
+### Installing the wheel directly (optional)
 `nvidia-pyindex` is updated monthly to include the latest version of all wheels.
 In some scenarios, Bobber could be updated well before the next `nvidia-pyindex`
 release. To install the latest release directly, go to the
 [releases](https://github.com/NVIDIA/Bobber/releases) page on the repository and
-find the latest release. Look for the "Binary" section in the release notes and
+find the latest release. Look for the "Assets" section in the release notes and
 copy the link to the latest wheel.
 
-Using `pip3`, install the binary using the address from the previous step to all
+Using `pip3`, install the wheel using the address from the previous step to all
 remote machines which will be tested, for example:
 
 ```bash
-pip3 install https://github.com/NVIDIA/Bobber/releases/download/v6.1.1/nvidia_bobber-6.1.1-py3-none-any.whl
+pip3 install https://github.com/NVIDIA/Bobber/releases/download/v6.2.0/nvidia_bobber-6.2.0-py3-none-any.whl
 ```
 
 ## Build Bobber container (includes OSU Tests, NCCL Tests, fio, mdtest, DALI RN50 Pipeline, and the base NGC TensorFlow container)
@@ -113,14 +113,14 @@ tests, run the command on the node to be tested.
 $ bobber build
 Building a new image. This may take a while...
 ...
-nvidia/bobber:6.1.1 successfully built
+nvidia/bobber:6.2.0 successfully built
 ```
 
 After building, verify the image is accessible in Docker:
 
 ```bash
 $ docker images | grep nvidia/bobber
-nvidia/bobber               6.1.1               c697a75ee482        36 minutes ago      12.4GB
+nvidia/bobber               6.2.0               c697a75ee482        36 minutes ago      12.4GB
 ```
 
 ## Save container
@@ -135,10 +135,10 @@ If running on a single node, this step is not required.
 
 ```bash
 $ bobber export
-Exporting nvidia/bobber:6.1.1 to "nvidia_bobber_6.1.1.tar". This may take a while...
-nvidia/bobber:6.1.1 saved to nvidia_bobber_6.1.1.tar
+Exporting nvidia/bobber:6.2.0 to "nvidia_bobber_6.2.0.tar". This may take a while...
+nvidia/bobber:6.2.0 saved to nvidia_bobber_6.2.0.tar
 $ ls
-nvidia_bobber_6.1.1.tar
+nvidia_bobber_6.2.0.tar
 ```
 
 ## Copy container to other nodes
@@ -170,7 +170,7 @@ On all other nodes, load the copied Docker image.
 ```bash
 $ docker load < nvidia_bobber_{version}.tar
 $ docker images | grep bobber
-nvidia/bobber               6.1.1               c697a75ee482        36 minutes ago      12.4GB
+nvidia/bobber               6.2.0               c697a75ee482        36 minutes ago      12.4GB
 ```
 
 ## Ensure shared filesystem is mounted, if necessary
