@@ -31,8 +31,11 @@ bobber parse-results --compare-baseline single-dgx-station-baseline results_logs
 
 ### Using custom baselines
 To use a custom baseline, a YAML file needs to be created which specifies the
-expected performance for every test. A [sample file](sample_baseline.yaml) has
-been created as a guide. Every custom baseline file must have the following
+expected performance for every test. This can be done by running the
+`parse-results` command against a directory which will automatically generate a
+YAML baseline in the directory named `baseline.yaml`. A
+[sample file](sample_baseline.yaml) has also been created as a reference if a
+custom baseline is desired. Every custom baseline file must have the following
 structure:
 
 ```
@@ -65,7 +68,7 @@ After saving the YAML file locally, run the comparison as follows while updating
 the YAML file location and log directory, if applicable:
 
 ```
-bobber parse-results --custom-baseline custom_baseline_file.yaml results_log/
+bobber parse-results --custom-baseline baseline.yaml results_log/
 ```
 
 ### Adding a tolerance

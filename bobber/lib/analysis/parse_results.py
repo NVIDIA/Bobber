@@ -15,6 +15,7 @@ from bobber.lib.analysis.fio import parse_fio_bw_file, parse_fio_iops_file
 from bobber.lib.analysis.meta import parse_meta_file
 from bobber.lib.analysis.nccl import parse_nccl_file
 from bobber.lib.analysis.table import display_table
+from bobber.lib.system.file_handler import write_file
 from typing import NoReturn, Optional, Tuple
 
 
@@ -220,6 +221,52 @@ def save_json(final_dictionary_output: dict, filename: str) -> NoReturn:
         print(f'JSON data saved to {filename}')
 
 
+def save_yaml_baseline(final_dictionary_output: dict,
+                       directory: str) -> NoReturn:
+    """
+    Save results as a YAML baseline file.
+
+    The parsed results should be saved as a YAML baseline file which can be
+    used to compare similar systems against existing results. The YAML file
+    will be saved in the results directory as "baseline.yaml".
+
+    Parameters
+    ----------
+    final_dictionary_output : dict
+        A ``dictionary`` of the parsed results on a per-system level.
+    directory : str
+        A ``string`` of the directory where results are saved.
+    """
+    contents = 'systems:\n'
+
+    for systems, results in final_dictionary_output['systems'].items():
+        dali = results.get('dali', {})
+        small_jpg = dali.get('800x600 standard jpg', {})
+        large_jpg = dali.get('3840x2160 standard jpg', {})
+        small_tf = dali.get('800x600 tfrecord', {})
+        large_tf = dali.get('3840x2160 tfrecord', {})
+        contents += f"""    {systems}:
+        bandwidth:
+            # FIO BW speed in bytes/second
+            read: {results.get('bandwidth', {}).get('read', 0)}
+            write: {results.get('bandwidth', {}).get('write', 0)}
+        iops:
+            # FIO IOPS speed in ops/second
+            read: {results.get('iops', {}).get('read', 0)}
+            write: {results.get('iops', {}).get('write', 0)}
+        nccl:
+            # NCCL maximum bus bandwidth in GB/s
+            max_bus_bw: {results.get('nccl', {}).get('max_bus_bw', 0)}
+        dali:
+            # DALI average speed in images/second
+            800x600 standard jpg: {small_jpg.get('average images/second', 0)}
+            3840x2160 standard jpg: {large_jpg.get('average images/second', 0)}
+            800x600 tfrecord: {small_tf.get('average images/second', 0)}
+            3840x2160 tfrecord: {large_tf.get('average images/second', 0)}
+"""
+    write_file(f'{directory}/baseline.yaml', contents)
+
+
 def main(directory: str,
          baseline: Optional[str] = None,
          custom_baseline: Optional[str] = None,
@@ -309,6 +356,7 @@ def main(directory: str,
     final_dictionary_output['total_systems'] = total_systems
     final_dictionary_output['bobber_version'] = bobber_version
     display_table(final_dictionary_output)
+    save_yaml_baseline(final_dictionary_output, directory)
     save_json(final_dictionary_output, json_filename)
 
     if custom_baseline:

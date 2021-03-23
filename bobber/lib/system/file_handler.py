@@ -32,6 +32,21 @@ def update_log(logfile: str, contents: str) -> NoReturn:
         log.write(contents)
 
 
+def write_file(filename: str, contents: str) -> NoReturn:
+    """
+    Write data to a file.
+
+    Parameters
+    ----------
+    filename : string
+        A ``string`` of the file to write data to.
+    contents : string
+        A ``string`` of the contents to write to the file.
+    """
+    with open(filename, 'w') as fp:
+        fp.write(contents)
+
+
 def read_yaml(filename: str) -> dict:
     """
     Read a YAML file and return the contents.
