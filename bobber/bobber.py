@@ -187,8 +187,8 @@ def parse_args(version: str) -> Namespace:
     parse.add_argument('log_path', metavar='log-path', help='Path to saved '
                        'logfile location')
     parse.add_argument('--json-filename', help='Specify the filename to use '
-                       'for saving the JSON data. Defaults to the current '
-                       'timestamp.', default=None)
+                       'for saving the JSON data. If not specified, the JSON '
+                       'data will not be saved.', default=None, type=str)
     parse.add_argument('--override-version-check', help='Optionally skip the '
                        'version check to ensure the same version of Bobber '
                        'was used for all tests.', action='store_true')
@@ -355,7 +355,8 @@ def execute_command(args: Namespace, version: str) -> NoReturn:
     if args.command == PARSE_RESULTS:
         parse_results.main(args.log_path, args.compare_baseline,
                            args.custom_baseline, args.baseline_tolerance,
-                           args.verbose)
+                           args.verbose, args.override_version_check,
+                           args.json_filename)
     elif args.command == BUILD:
         bobber.lib.docker.build(version)
     elif args.command == EXPORT:
