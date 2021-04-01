@@ -2,7 +2,6 @@
 import json
 import sys
 from collections import defaultdict
-from datetime import datetime
 from glob import glob
 from os.path import join
 from bobber.lib.exit_codes import MISSING_LOG_FILES, SUCCESS
@@ -203,7 +202,7 @@ def save_json(final_dictionary_output: dict, filename: str) -> NoReturn:
     Save results to a file.
 
     Save the final JSON data to a file for future reference. If the filename is
-    not specified, create one using the current date and timestamp.
+    not specified, don't save the file.
 
     Parameters
     ----------
@@ -213,9 +212,7 @@ def save_json(final_dictionary_output: dict, filename: str) -> NoReturn:
         A ``string`` of the filename to write the JSON data to.
     """
     if not filename:
-        stamp = datetime.now()
-        filename = (f'bobber_results_{stamp.date()}_{stamp.hour}.'
-                    f'{stamp.minute}.{stamp.second}.json')
+        return
     with open(filename, 'w') as json_file:
         json.dump(final_dictionary_output, json_file)
         print(f'JSON data saved to {filename}')
