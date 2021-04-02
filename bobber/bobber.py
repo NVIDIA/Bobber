@@ -115,7 +115,7 @@ def parse_args(version: str) -> Namespace:
                                  'images', type=int)
     commands_parent.add_argument('--nccl-max', help='Specify the maximum data '
                                  'size to test with NCCL, in Gigabytes '
-                                 '(default is 1 GB)', type=int, default=1)
+                                 '(default is 1 GB)', type=int)
     commands_parent.add_argument('--nccl-ib-hcas', help='Specify the list of '
                                  'interfaces to use for NCCL test multinode '
                                  'communication', default='')
