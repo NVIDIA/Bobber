@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --job-name bobber_nccl
+# SPDX-License-Identifier: MIT
+set -euxo pipefail
+
+# Required vars
+: "${HOSTS:=4}"
+: "${FS_PATH:=/mnt/fs}"
+: "${CONT_VERSION:=nvcr.io/nvidian/bobber:6.1.1}"
+: "${NCCL_MAX:=1}"
+: "${LOGDIR:=test_logs/}"
+: "${LOGPATH:=test_logs/nccl.log}"
+: "${NCCL_IB_HCAS:=}"
+: "${COMPUTE_GID:=0}"
+: "${NCCL_TC:=}"
+
+mkdir -p ${LOGDIR}
+
+NCCL_MAX=${NCCL_MAX} NCCL_IB_HCAS=${NCCL_IB_HCAS} COMPUTE_GID=${COMPUTE_GID} NCCL_TC=${NCCL_TC} srun --nodes=${HOSTS} --ntasks-per-node=8 --mpi=pmix --exclusive --container-image ${CONT_VERSION} --container-mounts=${FS_PATH}:/mnt/fs_under_test /tests/nccl_slurm.sh |& tee ${LOGPATH}

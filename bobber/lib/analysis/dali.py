@@ -139,6 +139,42 @@ def _update_results(image_type_match: dict, results: list) -> dict:
     return image_type_match
 
 
+def _slurm_test_sections(log_contents: str) -> list:
+    """
+    Parse the SLURM log test sections.
+
+    The SLURM log files for DALI tests have a different structure to the output
+    which needs to be special-handled. These sections are parsed by reading
+    from the beginning of one sub-section (ie. small JPGs) until the first time
+    the next sub-section is encountered (ie. large JPGs).
+
+    Parameters
+    ----------
+    log_contents : str
+        A ``string`` of the complete contents from the log file.
+
+    Returns
+    -------
+    list
+        Returns a ``list`` of strings where each element is the complete output
+        from a test subsection.
+    """
+    small_jpg = re.findall('800x600/file_read_pipeline.*'
+                           '?3840x2160/file_read_pipeline',
+                           log_contents, re.DOTALL)
+    large_jpg = re.findall('3840x2160/file_read_pipeline.*'
+                           '?800x600/tfrecord_pipeline',
+                           log_contents, re.DOTALL)
+    small_tf = re.findall('800x600/tfrecord_pipeline.*'
+                          '?3840x2160/tfrecord_pipeline',
+                          log_contents, re.DOTALL)
+    large_tf = re.findall('3840x2160/tfrecord_pipeline.*'
+                          'OK', log_contents, re.DOTALL)
+    sections = [small_jpg, large_jpg, small_tf, large_tf]
+    sections = ['\n'.join(section) for section in sections]
+    return sections
+
+
 def _result_parsing(log_contents: str, systems: int, image_results: dict,
                     log_file: str) -> dict:
     """
@@ -188,6 +224,10 @@ def _result_parsing(log_contents: str, systems: int, image_results: dict,
     ]
 
     test_sections = re.findall(r'RUN 1/1.*?OK', log_contents, re.DOTALL)
+    # The SLURM tests have a different layout and need to be grabbed
+    # appropriately
+    if '+ srun --nodes=' in log_contents:
+        test_sections = _slurm_test_sections(log_contents)
     if len(test_sections) != 4:
         print(f'Warning: Invalid number of results found in {log_file} log '
               'file. Skipping...')

@@ -1,0 +1,16 @@
+#!/bin/bash
+#SBATCH --job-name bobber_nccl
+# SPDX-License-Identifier: MIT
+set -euxo pipefail
+
+# Required vars
+: "${HOSTS:=4}"
+: "${FS_PATH:=/mnt/fs}"
+: "${CONT_VERSION:=nvcr.io/nvidian/bobber:6.1.1}"
+: "${LOGDIR:=test_logs/}"
+: "${LOGPATH:=test_logs/mdtest.log}"
+
+mkdir -p ${LOGDIR}
+
+# Default to 44 threads per node for known working config
+srun --nodes=${HOSTS} --ntasks-per-node=44 --mpi=pmix --exclusive --container-image ${CONT_VERSION} --container-mounts=${FS_PATH}:/mnt/fs_under_test /tests/mdtest_slurm.sh |& tee ${LOGPATH}
