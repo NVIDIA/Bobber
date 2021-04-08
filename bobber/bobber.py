@@ -20,7 +20,9 @@ from bobber.lib.constants import (
     RUN_STG_BW,
     RUN_STG_IOPS,
     RUN_STG_META,
-    SYSTEMS
+    SYSTEMS,
+    READ_PATTERNS,
+    WRITE_PATTERNS
 )
 from bobber.lib.analysis import parse_results
 from bobber.lib.system.file_handler import create_directory
@@ -131,6 +133,16 @@ def parse_args(version: str) -> Namespace:
                                  type=int)
     commands_parent.add_argument('--iops-threads', help='Maximum number of '
                                  'threads to use for iops tests', type=int)
+    commands_parent.add_argument('--read-pattern', help='Specify IO pattern '
+                                 'for fio read tests. Supported values: '
+                                 'sequential, random. Defaults to sequential.',
+                                 default='sequential',
+                                 choices=READ_PATTERNS.keys())
+    commands_parent.add_argument('--write-pattern', help='Specify IO pattern '
+                                 'for fio write tests. Supported values: '
+                                 'sequential, random. Defaults to sequential.',
+                                 default='sequential',
+                                 choices=WRITE_PATTERNS.keys())
     commands_parent.add_argument('--iterations', help='Number of iterations to'
                                  ' execute per test - a seperate log file will'
                                  ' be generated for each iteration', type=int,

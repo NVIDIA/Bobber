@@ -83,6 +83,8 @@ def run_stg_bw(args: Namespace, bobber_version: str, iteration: int,
                               f'threads_{args.bw_threads}_'
                               f'direct_{args.direct}_'
                               f'depth_{args.io_depth}_'
+                              f'read_pattern_{args.read_pattern}_'
+                              f'write_pattern_{args.write_pattern}_'
                               f'systems_{len(hosts.split(","))}_'
                               f'version_{bobber_version}.log')
     environment = {
@@ -90,6 +92,8 @@ def run_stg_bw(args: Namespace, bobber_version: str, iteration: int,
         'IO_DEPTH': args.io_depth,
         'DIRECTIO': args.direct,
         'THREADS': args.bw_threads,
+        'READ_PATTERN': args.read_pattern,
+        'WRITE_PATTERN': args.write_pattern,
         'HOSTS': hosts
     }
     manager.execute('tests/fio_multi.sh',
@@ -125,6 +129,8 @@ def run_stg_iops(args: Namespace, bobber_version: str, iteration: int,
                                 f'stg_iops_iteration_{iteration}_'
                                 f'threads_{args.iops_threads}_'
                                 f'direct_{args.direct}_'
+                                f'read_pattern_{args.read_pattern}_'
+                                f'write_pattern_{args.write_pattern}_'
                                 f'systems_{len(hosts.split(","))}_'
                                 f'version_{bobber_version}.log')
     environment = {
@@ -133,6 +139,8 @@ def run_stg_iops(args: Namespace, bobber_version: str, iteration: int,
         'DIRECTIO': args.direct,
         'THREADS': args.iops_threads,
         'IOSIZE': 4,
+        'READ_PATTERN': args.read_pattern,
+        'WRITE_PATTERN': args.write_pattern,
         'HOSTS': hosts
     }
     manager.execute('tests/fio_multi.sh',
