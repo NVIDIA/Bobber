@@ -21,7 +21,9 @@ from bobber.lib.constants import (
     RUN_STG_IOPS,
     RUN_STG_125K,
     RUN_STG_META,
-    SYSTEMS
+    SYSTEMS,
+    READ_PATTERNS,
+    WRITE_PATTERNS
 )
 from bobber.lib.analysis import parse_results
 from bobber.lib.system.file_handler import create_directory
@@ -135,6 +137,16 @@ def parse_args(version: str) -> Namespace:
                                  '125K IO size tests', type=int)
     commands_parent.add_argument('--iops-threads', help='Maximum number of '
                                  'threads to use for iops tests', type=int)
+    commands_parent.add_argument('--read-pattern', help='Specify IO pattern '
+                                 'for fio read tests. Supported values: '
+                                 'read, randread. Defaults to read.',
+                                 default='read',
+                                 choices=READ_PATTERNS)
+    commands_parent.add_argument('--write-pattern', help='Specify IO pattern '
+                                 'for fio write tests. Supported values: '
+                                 'write, randwrite. Defaults to write.',
+                                 default='write',
+                                 choices=WRITE_PATTERNS)
     commands_parent.add_argument('--iterations', help='Number of iterations to'
                                  ' execute per test - a seperate log file will'
                                  ' be generated for each iteration', type=int,

@@ -253,8 +253,15 @@ def fio_command_details(log_contents: str, old_reads: dict,
         elif '--rw=write' in command:
             write_params = _fio_command_parse(command)
             write_params['command'] = command
+        elif '--rw=randread' in command:
+            read_params = _fio_command_parse(command)
+            read_params['command'] = command
+        elif '--rw=randwrite' in command:
+            write_params = _fio_command_parse(command)
+            write_params['command'] = command
         else:
-            raise ValueError('Unexpected FIO test type. Expected read/write.')
+            raise ValueError('Unexpected FIO test type. Expected '
+                             'read, write, randread, or randwrite.')
     if old_reads and old_writes:
         if not _compare_dicts(old_reads, read_params) or \
            not _compare_dicts(old_writes, write_params):

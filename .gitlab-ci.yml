@@ -41,5 +41,5 @@ test:
         - python setup.py bdist_wheel sdist
         - pip install dist/nvidia_bobber-*-none-any.whl
         - bobber cast /raid
-        - bobber run-all --ssh-iface enp2s0f0 --iterations 2 --batch-size-sm 512 --batch-size-lg 256 --gpus 4 --bw-threads 16 --125k-threads 32 --iops-threads 96 test_results localhost
+        - bobber run-all --ssh-iface enp2s0f0 --iterations 2 --batch-size-sm 512 --batch-size-lg 256 --gpus 4 --bw-threads 16 --125k-threads 32 --iops-threads 96 --read-pattern randread test_results localhost
         - bobber parse-results --compare-baseline single-dgx-station-baseline test_results/
