@@ -51,6 +51,16 @@ SYSTEMS = {
     'dgx-2': DGX_2
 }
 
+READ_PATTERNS = {
+    'sequential': 'read',
+    'random': 'randread'
+}
+
+WRITE_PATTERNS = {
+    'sequential': 'write',
+    'random': 'randwrite'
+}
+
 # Baseline Results
 # This is considered a minimum value that tests should hit in order to be
 # verified the system has been configured properly for HPC and AI workloads.
