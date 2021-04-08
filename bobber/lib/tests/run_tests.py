@@ -125,6 +125,7 @@ def run_stg_iops(args: Namespace, bobber_version: str, iteration: int,
                                 f'stg_iops_iteration_{iteration}_'
                                 f'threads_{args.iops_threads}_'
                                 f'direct_{args.direct}_'
+                                f'depth_{args.io_depth}_'
                                 f'systems_{len(hosts.split(","))}_'
                                 f'version_{bobber_version}.log')
     environment = {
