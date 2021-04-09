@@ -10,6 +10,8 @@ FIO_READ_BW = f'{bcolors.BOLD}FIO Read (GB/s) - 1MB BS{bcolors.ENDC}'
 FIO_WRITE_BW = f'{bcolors.BOLD}FIO Write (GB/s) - 1MB BS{bcolors.ENDC}'
 FIO_READ_IOP = f'{bcolors.BOLD}FIO Read (k IOPS) - 4K BS{bcolors.ENDC}'
 FIO_WRITE_IOP = f'{bcolors.BOLD}FIO Write (k IOPS) - 4K BS{bcolors.ENDC}'
+FIO_125K_READ_BW = f'{bcolors.BOLD}FIO Read (GB/s) - 125K BS{bcolors.ENDC}'
+FIO_125K_WRITE_BW = f'{bcolors.BOLD}FIO Write (GB/s) - 125K BS{bcolors.ENDC}'
 NCCL = f'{bcolors.BOLD}NCCL Max BW (GB/s){bcolors.ENDC}'
 DALI_IMG_SM = (f'{bcolors.BOLD}DALI Standard 800x600 throughput '
                f'(images/second){bcolors.ENDC}')
@@ -140,6 +142,38 @@ def fio_iops(results: list) -> Tuple[list, list]:
                                  for result in results]
         write = [FIO_WRITE_IOP] + [iops_to_kiops(result[1]['iops']['write'])
                                    for result in results]
+    except KeyError:
+        return []
+    else:
+        return [read, write]
+
+
+def fio_125k_bw(results: list) -> Tuple[list, list]:
+    """
+    Save the FIO 125k bandwidth read and write results.
+
+    Save the read and write results from the FIO 125k bandwidth tests on an
+    increasing per-system basis with the first element in the list being the
+    column header.
+
+    Parameters
+    ----------
+    results : list
+        A ``list`` of ``dictionaries`` containing all results from the tests.
+
+    Returns
+    -------
+    tuple
+        Returns a ``tuple`` of (``list``, ``list``) containing the read and
+        write 125k bandwidth results, respectively.
+    """
+    try:
+        read = [FIO_125K_READ_BW] + [bytes_to_gb(result[1]['125k_bandwidth']
+                                                 ['read'])
+                                     for result in results]
+        write = [FIO_125K_WRITE_BW] + [bytes_to_gb(result[1]['125k_bandwidth']
+                                                   ['write'])
+                                       for result in results]
     except KeyError:
         return []
     else:
@@ -288,6 +322,7 @@ def display_table(json_results: dict) -> NoReturn:
 
     data += fio_bw(results)
     data += fio_iops(results)
+    data += fio_125k_bw(results)
     data += nccl(results)
     data += dali(results)
 

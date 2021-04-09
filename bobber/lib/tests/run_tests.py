@@ -7,6 +7,7 @@ from bobber.lib.constants import (
     RUN_NCCL,
     RUN_STG_BW,
     RUN_STG_IOPS,
+    RUN_STG_125K,
     RUN_STG_META
 )
 from bobber.lib.docker import manager
@@ -95,6 +96,50 @@ def run_stg_bw(args: Namespace, bobber_version: str, iteration: int,
     manager.execute('tests/fio_multi.sh',
                     environment=environment,
                     log_file=stg_bw_log)
+
+    if args.pause > 0:
+        sleep(args.pause)
+
+
+def run_stg_125k(args: Namespace, bobber_version: str, iteration: int,
+                 hosts: str) -> NoReturn:
+    """
+    Run single or multi-node storage 125KB IO size tests with FIO.
+
+    Run a single or multi-node storage bandwidth test with FIO which first
+    writes data to the filesystem with 125KB block size and 4GB file size,
+    followed by reading the data back.
+
+    Parameters
+    ----------
+    args : Namespace
+        A ``Namespace`` of all settings specified by the user for the test.
+    bobber_version : string
+        A ``string`` of the local version of Bobber, such as '5.0.0'.
+    iteration : int
+        An ``int`` of the local test number, starting at 1.
+    hosts : string
+        A comma-separated list of hostnames to test against, such as
+        'host1,host2,host3,host4'.
+    """
+    stg_125k_log = os.path.join(args.log_path,
+                                f'stg_125k_iteration_{iteration}_'
+                                f'threads_{args.stg_125k_threads}_'
+                                f'direct_{args.direct}_'
+                                f'depth_{args.io_depth}_'
+                                f'systems_{len(hosts.split(","))}_'
+                                f'version_{bobber_version}.log')
+    environment = {
+        'EXTRA_FLAGS': args.stg_extra_flags,
+        'IO_DEPTH': args.io_depth,
+        'IOSIZE': 125,
+        'DIRECTIO': args.direct,
+        'THREADS': args.stg_125k_threads,
+        'HOSTS': hosts
+    }
+    manager.execute('tests/fio_multi.sh',
+                    environment=environment,
+                    log_file=stg_125k_log)
 
     if args.pause > 0:
         sleep(args.pause)
@@ -253,6 +298,8 @@ def kickoff_test(args: Namespace, bobber_version: str, iteration: int,
         run_stg_bw(args, bobber_version, iteration, hosts)
     elif args.command == RUN_STG_IOPS:
         run_stg_iops(args, bobber_version, iteration, hosts)
+    elif args.command == RUN_STG_125K:
+        run_stg_125k(args, bobber_version, iteration, hosts)
     elif args.command == RUN_STG_META:
         run_stg_meta(args, bobber_version, iteration, hosts)
     elif args.command == RUN_ALL:
@@ -261,6 +308,7 @@ def kickoff_test(args: Namespace, bobber_version: str, iteration: int,
         run_stg_bw(args, bobber_version, iteration, hosts)
         run_dali(args, bobber_version, iteration, hosts)
         run_stg_iops(args, bobber_version, iteration, hosts)
+        run_stg_125k(args, bobber_version, iteration, hosts)
 
 
 def test_selector(args: Namespace, bobber_version: str) -> NoReturn:
