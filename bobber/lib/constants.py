@@ -9,11 +9,13 @@ RUN_DALI = 'run-dali'
 RUN_NCCL = 'run-nccl'
 RUN_STG_BW = 'run-stg-bw'
 RUN_STG_IOPS = 'run-stg-iops'
+RUN_STG_125K = 'run-stg-125k'
 RUN_STG_META = 'run-stg-meta'
 
 DGX_A100_SINGLE = {
     'gpus': 8,
     'bw_threads': 16,
+    'stg_125k_threads': 16,
     'iops_threads': 200,
     'batch_size_sm': 512,
     'batch_size_lg': 256,
@@ -25,6 +27,7 @@ DGX_A100_SINGLE = {
 DGX_A100_DUAL = {
     'gpus': 8,
     'bw_threads': 16,
+    'stg_125k_threads': 16,
     'iops_threads': 200,
     'batch_size_sm': 512,
     'batch_size_lg': 256,
@@ -36,6 +39,7 @@ DGX_A100_DUAL = {
 DGX_2 = {
     'gpus': 16,
     'bw-threads': 16,
+    'stg_125k_threads': 16,
     'batch-size-sm': 150,
     'batch-size-lg': 75,
     'iops-threads': 80,
