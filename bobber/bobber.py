@@ -31,6 +31,41 @@ from bobber.lib.tests import run_tests
 from typing import NoReturn
 
 
+def test_qty_validation(test_qty: str) -> str:
+    """
+    Verify all test quantity values are  positive integers.
+
+    Parameters
+    ----------
+    test_qty : str
+        A ``string`` of the comma-separated test quantities from the user,
+        such as '1,2,3,...'
+
+    Returns
+    -------
+    str
+        Returns a ``string`` of the original test quantities list if all
+        test quantities are positive integers.
+
+    Raises
+    ------
+    ArgumentTypeError
+        Raises an ``ArgumentTypeError`` if any of the passed test quantities
+        are non-integers or negative intergers.
+    """
+    test_qty_list = test_qty.split(',')
+    conversion_test_list = []
+    for value in test_qty_list:
+        try:
+            conversion_test_list.append(int(value))
+        except ValueError:
+            raise ArgumentTypeError('Test quantity element invalid')
+
+        if int(value) <= 0:
+            raise ArgumentTypeError('Test quantity element is not positive')
+    return test_qty
+
+
 def unique_hosts(hosts: str) -> str:
     """
     Verify all hosts are unique.
@@ -158,6 +193,18 @@ def parse_args(version: str) -> Namespace:
                                  'of a single system (so, 3 systems specified '
                                  'would result in tests for 1, 2, and 3 '
                                  'systems)', action='store_true')
+    commands_parent.add_argument('--test-qty', help='Comma-separated list of '
+                                 'host counts to test. For example, for a '
+                                 'list of 10 hosts specified via thse hosts '
+                                 'flag, to test only multiples of two, this '
+                                 'flag value should be 2,4,6,8,10. Note that '
+                                 '--sweep should also be present, otherwise '
+                                 'only the maximum number of systems '
+                                 'specified by --hosts will be tested. If '
+                                 'this flag is unspecified, all node counts '
+                                 'from 1 to the maximum number of systems '
+                                 'specified by --hosts will be tested',
+                                 type=test_qty_validation)
     commands_parent.add_argument('--system', help='If system is specified, '
                                  'iops-threads, 125k-threads, bw-threads, '
                                  'gpus, batch size, and network interface '

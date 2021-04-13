@@ -340,12 +340,16 @@ def test_selector(args: Namespace, bobber_version: str) -> NoReturn:
     """
     if args.sweep:
         hosts = []
+        host_qtys_to_test = None
+        if args.test_qty:
+            host_qtys_to_test = args.test_qty.split(",")
 
         for host in args.hosts.split(','):
             hosts.append(host)
-            for iteration in range(1, args.iterations + 1):
-                host_string = ','.join(hosts)
-                kickoff_test(args, bobber_version, iteration, host_string)
+            if host_qtys_to_test is None or len(hosts) in host_qtys_to_test:
+                for iteration in range(1, args.iterations + 1):
+                    host_string = ','.join(hosts)
+                    kickoff_test(args, bobber_version, iteration, host_string)
     else:
         for iteration in range(1, args.iterations + 1):
             kickoff_test(args, bobber_version, iteration, args.hosts)
