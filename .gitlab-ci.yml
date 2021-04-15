@@ -1,0 +1,45 @@
+stages:
+    - pre_clean
+    - docker_build
+    - test
+
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+
+pre_clean:
+    stage: pre_clean
+    script:
+        - echo "Cleaning all Docker containers, images, and volumes"
+        - if [[ $(docker ps -q) ]]; then docker kill $(docker ps -q); fi
+        - if [[ $(docker ps -q -a) ]]; then docker rm $(docker ps -q -a); fi
+        - docker system prune --all --force
+        - echo "Removing old results"
+        - rm -rf ~/build_output
+        - echo "Removing old virtual environments"
+        - rm -rf env/
+
+docker_build:
+    stage: docker_build
+    script:
+        - echo "Testing all containers to verify successful building"
+        - echo "Building Python wheel"
+        - virtualenv --python python3 env
+        - source env/bin/activate
+        - python setup.py bdist_wheel sdist
+        - pip install dist/nvidia_bobber-*-none-any.whl
+        - echo "Building latest Bobber image"
+        - bobber build
+        # Capture the build ID during the image build process and ensure it is listed in the system
+        - docker images | grep `bobber build | grep "Successfully built" | awk '{print $3}'`
+
+test:
+    stage: test
+    script:
+        - echo "Running a single-node test to verify functionality"
+        - virtualenv --python python3 env
+        - source env/bin/activate
+        - python setup.py bdist_wheel sdist
+        - pip install dist/nvidia_bobber-*-none-any.whl
+        - bobber cast /raid
+        - bobber run-all --ssh-iface enp2s0f0 --iterations 2 --batch-size-sm 512 --batch-size-lg 256 --gpus 4 --bw-threads 16 --iops-threads 200 test_results localhost
+        - bobber parse-results --compare-baseline single-dgx-station-baseline test_results/
