@@ -80,7 +80,7 @@ RUN wget --no-check-certificate https://mvapich.cse.ohio-state.edu/download/mvap
 
 RUN python3 -m pip install nvidia-pyindex && \
     python3 -m pip install \
-        nvidia-imageinary['mxnet']==1.0.3
+        nvidia-imageinary['mxnet']>=1.1.2
 
 RUN git clone https://github.com/jyvet/io-500-dev && \
 	cd io-500-dev && \
