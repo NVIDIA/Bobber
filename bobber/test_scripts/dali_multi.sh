@@ -42,8 +42,8 @@ mkdir -p /mnt/fs_under_test/imageinary_data/800x600/tfrecord_pipeline.idx
 imagine create-images --width 3840 --height 2160 --count $(($GPUS*1000)) --size /mnt/fs_under_test/imageinary_data/3840x2160/file_read_pipeline_images/images 4k_image_ jpg
 imagine create-images --width 800 --height 600 --count $(($GPUS*1000)) --size /mnt/fs_under_test/imageinary_data/800x600/file_read_pipeline_images/images small_image_ jpg
 
-imagine create-tfrecords --img-per-file 1000 /mnt/fs_under_test/imageinary_data/3840x2160/file_read_pipeline_images/images /mnt/fs_under_test/imageinary_data/3840x2160/tfrecord_pipeline tfrecord-
-imagine create-tfrecords --img-per-file 1000 /mnt/fs_under_test/imageinary_data/800x600/file_read_pipeline_images/images /mnt/fs_under_test/imageinary_data/800x600/tfrecord_pipeline tfrecord-
+imagine create-tfrecord --img-per-file 1000 /mnt/fs_under_test/imageinary_data/3840x2160/file_read_pipeline_images/images /mnt/fs_under_test/imageinary_data/3840x2160/tfrecord_pipeline tfrecord-
+imagine create-tfrecord --img-per-file 1000 /mnt/fs_under_test/imageinary_data/800x600/file_read_pipeline_images/images /mnt/fs_under_test/imageinary_data/800x600/tfrecord_pipeline tfrecord-
 
 for i in $(seq 0 $GPUS_ZERO_BASE); do /dali/tools/tfrecord2idx /mnt/fs_under_test/imageinary_data/3840x2160/tfrecord_pipeline/tfrecord-$i /mnt/fs_under_test/imageinary_data/3840x2160/tfrecord_pipeline.idx/tfrecord-$i; done
 for i in $(seq 0 $GPUS_ZERO_BASE); do /dali/tools/tfrecord2idx /mnt/fs_under_test/imageinary_data/800x600/tfrecord_pipeline/tfrecord-$i /mnt/fs_under_test/imageinary_data/800x600/tfrecord_pipeline.idx/tfrecord-$i; done
