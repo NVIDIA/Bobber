@@ -76,7 +76,7 @@ SINGLE_DGX_STATION_BASELINE = {
                 '800x600 standard jpg': 2000,
                 '3840x2160 standard jpg': 300,
                 '800x600 tfrecord': 2000,
-                '3840x2160 tfrecord': 300
+                '3840x2160 tfrecord': 250
             }
         }
     }
