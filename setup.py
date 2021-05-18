@@ -34,6 +34,7 @@ setup(
         'docker >= 4.3.1',
         'numpy >= 1.9.5',
         'pyyaml >= 5.4.0',
-        'tabulate >= 0.8.7'
+        'tabulate >= 0.8.7',
+        'six>=1.15.0'
     ]
 )
