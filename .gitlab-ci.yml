@@ -22,9 +22,12 @@ docker_build:
     stage: docker_build
     script:
         - echo "Testing all containers to verify successful building"
-        - echo "Building Python wheel"
+        - echo "Creating and activating virtual environment"
         - virtualenv --python python3 env
         - source env/bin/activate
+        - echo "Installing requirements"
+        - pip install -r requirements.txt
+        - echo "Building Python wheel"
         - python setup.py bdist_wheel sdist
         - pip install dist/nvidia_bobber-*-none-any.whl
         - echo "Building latest Bobber image"
