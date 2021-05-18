@@ -9,7 +9,7 @@ and matches the version of the Bobber wheel. Check the Bobber version with:
 
 ```
 $ bobber --version
-6.1.1
+6.2.0
 ```
 
 The version number is listed in the first line. Check the Bobber image is built
@@ -17,10 +17,10 @@ and matches the version above with:
 
 ```
 $ docker images | grep nvidia/bobber
-nvidia/bobber   6.1.1   c697a75ee482    36 minutes ago  12.4GB
+nvidia/bobber   6.2.0   c697a75ee482    36 minutes ago  12.4GB
 ```
 
-If the above command does not contain output or the second column (`6.1.1` in
+If the above command does not contain output or the second column (`6.2.0` in
 the example) does not match the version of Bobber from the first step, the image
 needs to be built. Run `bobber build` to build the image and verify using the
 steps above once complete.
@@ -30,7 +30,7 @@ This can be verified with:
 
 ```
 $ docker ps | grep bobber
-1ab2b10f8eb1    nvidia/bobber:6.1.1 "/usr/local/bin/nvid..."    4 days ago  Up 4 days   bobber
+1ab2b10f8eb1    nvidia/bobber:6.2.0 "/usr/local/bin/nvid..."    4 days ago  Up 4 days   bobber
 ```
 
 If the above command does not contain output, the container needs to be launched
