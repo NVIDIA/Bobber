@@ -19,6 +19,7 @@ from bobber.lib.constants import (
     RUN_NCCL,
     RUN_STG_BW,
     RUN_STG_IOPS,
+    RUN_STG_125K,
     RUN_STG_META,
     SYSTEMS
 )
@@ -129,6 +130,9 @@ def parse_args(version: str) -> Namespace:
     commands_parent.add_argument('--bw-threads', help='Maximum number of '
                                  'threads to use for bandwidth tests',
                                  type=int)
+    commands_parent.add_argument('--125k-threads', dest='stg_125k_threads',
+                                 help='Maximum number of threads to use for '
+                                 '125K IO size tests', type=int)
     commands_parent.add_argument('--iops-threads', help='Maximum number of '
                                  'threads to use for iops tests', type=int)
     commands_parent.add_argument('--iterations', help='Number of iterations to'
@@ -143,11 +147,12 @@ def parse_args(version: str) -> Namespace:
                                  'would result in tests for 1, 2, and 3 '
                                  'systems)', action='store_true')
     commands_parent.add_argument('--system', help='If system is specified, '
-                                 'iops-threads, bw-threads, gpus, batch size, '
-                                 'and network interface names are given '
-                                 'default values - override by specifying the '
-                                 'flags you\'d prefer to override, ignore the '
-                                 'flags you are ok with using defaults for '
+                                 'iops-threads, 125k-threads, bw-threads, '
+                                 'gpus, batch size, and network interface '
+                                 'names are given default values - override '
+                                 'by specifying the flags you\'d prefer to '
+                                 'override, ignore the flags you are ok with '
+                                 'using defaults for '
                                  'supported systems: dgx-a100-single, '
                                  'dgx-a100-dual, and dgx-2 for now. -single '
                                  'is used for a system with a single storage '
@@ -170,11 +175,13 @@ def parse_args(version: str) -> Namespace:
                         parents=[commands_parent])
     commands.add_parser(RUN_NCCL, help='Run NCCL tests only',
                         parents=[commands_parent])
-    commands.add_parser(RUN_STG_BW, help='Run storage bandwdith tests only',
+    commands.add_parser(RUN_STG_BW, help='Run storage bandwidth test only',
                         parents=[commands_parent])
-    commands.add_parser(RUN_STG_IOPS, help='Run storage IOPS tests only',
+    commands.add_parser(RUN_STG_125K, help='Run storage 125 IO size test only',
                         parents=[commands_parent])
-    commands.add_parser(RUN_STG_META, help='Run storage metadata tests only',
+    commands.add_parser(RUN_STG_IOPS, help='Run storage IOPS test only',
+                        parents=[commands_parent])
+    commands.add_parser(RUN_STG_META, help='Run storage metadata test only',
                         parents=[commands_parent])
 
     # Options specific to exporting the containers

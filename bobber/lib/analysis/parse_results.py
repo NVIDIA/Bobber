@@ -110,6 +110,42 @@ def parse_fio_iops(log_files: list) -> Tuple[dict, dict, dict, dict]:
     return read_sys_results, write_sys_results, read_params, write_params
 
 
+def parse_fio_125k_bw(log_files: list) -> Tuple[dict, dict, dict, dict]:
+    """
+    Parse all FIO 125k bandwidth logs.
+
+    Find each FIO 125k bandwidth log in the results directory and parse the
+    read and write results and parameters from each log for all system counts.
+
+    Parameters
+    ----------
+    log_files : list
+        A ``list`` of ``strings`` of the paths to each log file in the results
+        directory.
+
+    Returns
+    -------
+    tuple
+        A ``tuple`` of four dictionaries containing the 125k read results, 125k
+        write results, 125k read parameters, and 125k write parameters for all
+        system counts.
+    """
+    read_sys_results = defaultdict(list)
+    write_sys_results = defaultdict(list)
+    read_params, write_params = None, None
+
+    fio_logs_by_systems = divide_logs_by_systems(log_files,
+                                                 'stg_125k_iteration')
+
+    for systems, files in fio_logs_by_systems.items():
+        read_sys_results, write_sys_results, read_params, write_params = \
+            parse_fio_bw_file(files,
+                              systems,
+                              read_sys_results,
+                              write_sys_results)
+    return read_sys_results, write_sys_results, read_params, write_params
+
+
 def parse_nccl(log_files: list) -> Tuple[dict, dict]:
     """
     Parse all NCCL logs.
@@ -251,6 +287,10 @@ def save_yaml_baseline(final_dictionary_output: dict,
             # FIO IOPS speed in ops/second
             read: {results.get('iops', {}).get('read', 0)}
             write: {results.get('iops', {}).get('write', 0)}
+        125k_bandwidth:
+            # FIO 125k BW speed in bytes/second
+            read: {results.get('125k_bandwidth', {}).get('read', 0)}
+            write: {results.get('125k_bandwidth', {}).get('write', 0)}
         nccl:
             # NCCL maximum bus bandwidth in GB/s
             max_bus_bw: {results.get('nccl', {}).get('max_bus_bw', 0)}
@@ -315,6 +355,9 @@ def main(directory: str,
                                           override_version_check)
     bw_results = parse_fio_bw(log_files)
     read_bw, write_bw, read_bw_params, write_bw_params = bw_results
+    bw_125k_results = parse_fio_125k_bw(log_files)
+    read_125k_bw, write_125k_bw, read_125k_bw_params, write_125k_bw_params = \
+        bw_125k_results
     iops_results = parse_fio_iops(log_files)
     read_iops, write_iops, read_iops_params, write_iops_params = iops_results
     metadata = parse_meta(log_files)
@@ -323,7 +366,8 @@ def main(directory: str,
     total_systems = 0
     systems = []
 
-    for result in [read_bw, read_iops, max_bw, dali_results, metadata]:
+    for result in [read_bw, read_iops, read_125k_bw, max_bw, dali_results,
+                   metadata]:
         try:
             total_systems = max(result.keys())
             systems = sorted(result.keys())
@@ -341,6 +385,10 @@ def main(directory: str,
                                      write_iops,
                                      read_iops_params,
                                      write_iops_params,
+                                     read_125k_bw,
+                                     write_125k_bw,
+                                     read_125k_bw_params,
+                                     write_125k_bw_params,
                                      max_bw,
                                      bytes_sizes,
                                      dali_results,

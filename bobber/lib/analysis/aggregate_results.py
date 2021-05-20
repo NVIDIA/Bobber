@@ -70,6 +70,18 @@ class AggregateResults:
     write_iops_params : dict
         A ``dictionary`` of the parameters used during the fio write iops
         tests.
+    read_125k_bw : dict
+        A ``dictionary`` containing all of the fio 125k read bandwidth results
+        for N-systems.
+    write_125k_bw : dict
+        A ``dictionary`` containing all of the fio 125k write bandwidth results
+        for N-systems.
+    read_125k_bw_params : dict
+        A ``dictionary`` of the parameters used during the fio 125k read
+        bandwidth tests.
+    write_125k_bw_params : dict
+        A ``dictionary`` of the parameters used during the fio 125k write
+        bandwidth tests.
     max_bw : dict
         A ``dictionary`` of the maximum bus bandwidth achieved from NCCL tests.
     bytes_sizes : dict
@@ -93,6 +105,10 @@ class AggregateResults:
                  write_iops: dict,
                  read_iops_params: dict,
                  write_iops_params: dict,
+                 read_125k_bw: dict,
+                 write_125k_bw: dict,
+                 read_125k_bw_params: dict,
+                 write_125k_bw_params: dict,
                  max_bw: dict,
                  bytes_sizes: dict,
                  dali_results: dict,
@@ -102,10 +118,14 @@ class AggregateResults:
         self._read_bw_params = read_bw_params
         self._read_iops = read_iops
         self._read_iops_params = read_iops_params
+        self._125k_read_bw = read_125k_bw
+        self._125k_read_bw_params = read_125k_bw_params
         self._write_bw = write_bw
         self._write_bw_params = write_bw_params
         self._write_iops = write_iops
         self._write_iops_params = write_iops_params
+        self._125k_write_bw = write_125k_bw
+        self._125k_write_bw_params = write_125k_bw_params
         self._max_bw = max_bw
         self._bytes_sizes = bytes_sizes
         self._dali_results = dali_results
@@ -124,6 +144,8 @@ class AggregateResults:
         Aggregate Write Bandwidth: 1.232  GB/s
         Aggregate Read IOPS: 136.5 k IOPS
         Aggregate Write IOPS: 135.0 k IOPS
+        Aggregate 125k Read Bandwidth: 1.595  GB/s
+        Aggregate 125k Write Bandwidth: 1.232  GB/s
         NCCL Max Bus Bandwidth: 79.865 at 512.0 MB
         Mdtest
             Directory creation: 71406.29550000001 ops
@@ -159,6 +181,10 @@ class AggregateResults:
             ['Systems tested:', self._num_systems, ''],
             ['Aggregate Read Bandwidth:', self.average_read_bw, ' GB/s'],
             ['Aggregate Write Bandwidth:', self.average_write_bw, ' GB/s'],
+            ['Aggregate 125k Read Bandwidth:', self.average_125k_read_bw,
+             ' GB/s'],
+            ['Aggregate 125k Write Bandwidth:', self.average_125k_write_bw,
+             ' GB/s'],
             ['Aggregate Read IOPS:', self.average_read_iops, 'k IOPS'],
             ['Aggregate Write IOPS:', self.average_write_iops, 'k IOPS'],
         ]
@@ -275,6 +301,15 @@ DALI TFRecord 3840x2160{self._dali_results_print('3840x2160 tfrecord')}
                     'write': self._write_iops_params
                 }
             },
+            '125k_bandwidth': {
+                'read': self._average_125k_read_bw(),
+                'write': self._average_125k_write_bw(),
+                'unit': 'operations/second',
+                'parameters': {
+                    'read': self._125k_read_bw_params,
+                    'write': self._125k_write_bw_params
+                }
+            },
             'nccl': {
                 'max_bus_bw': self.max_bus_bandwidth,
                 'max_bus_bytes': self.max_bus_bytes,
@@ -324,6 +359,44 @@ DALI TFRecord 3840x2160{self._dali_results_print('3840x2160 tfrecord')}
         in GB/s, rounded to the nearest thousandth.
         """
         return round(self._average_write_bw() * 1e-9, 3)
+
+    @average_decorator
+    def _average_125k_read_bw(self) -> float:
+        """
+        Returns the average 125k read bandwidth as a ``float`` for all
+        iterations in B/s. Defaults to 0.0.
+        """
+        try:
+            return self._125k_read_bw[self._num_systems]
+        except KeyError:
+            return 0.0
+
+    @property
+    def average_125k_read_bw(self) -> float:
+        """
+        Returns the average 125k read bandwidth as a ``float`` for all
+        iterations in GB/s, rounded to the nearest thousandth.
+        """
+        return round(self._average_125k_read_bw() * 1e-9, 3)
+
+    @average_decorator
+    def _average_125k_write_bw(self) -> float:
+        """
+        Returns the average 125k write bandwidth as a ``float`` for all
+        iterations in B/s. Defaults to 0.0
+        """
+        try:
+            return self._125k_write_bw[self._num_systems]
+        except KeyError:
+            return 0.0
+
+    @property
+    def average_125k_write_bw(self) -> float:
+        """
+        Returns the average 125k write bandwidth as a ``float`` for all
+        iterations in GB/s, rounded to the nearest thousandth.
+        """
+        return round(self._average_125k_write_bw() * 1e-9, 3)
 
     @average_decorator
     def _average_read_iops(self) -> float:
