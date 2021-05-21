@@ -20,6 +20,14 @@ if [ "x$EXTRA_FLAGS" = "x" ]; then
         EXTRA_FLAGS=''
 fi
 
+if [ "x$READ_PATTERN" = "x" ]; then
+        READ_PATTERN="read"
+fi
+
+if [ "x$WRITE_PATTERN" = "x" ]; then
+        WRITE_PATTERN="write"
+fi
+
 HOSTS_WITH_SPACES=`echo $HOSTS | sed "s/,/ /g"`
 
 FSDIR=/mnt/fs_under_test
@@ -44,10 +52,10 @@ CREATEOPTS="--invalidate=${INVALIDATE} --blocksize=${CREATE_IOSIZE}k --size=${SI
 ## Run create with a large blocksize, because using a smaller blocksize will take an inordinate amount of time
 launch_fio --create_only=1 --rw=write ${IOSETTINGS} ${STDOPTS} ${CREATEOPTS}
 
-launch_fio --rw=write ${IOSETTINGS} ${STDOPTS} ${RUNOPTS} ${EXTRA_FLAGS}
+launch_fio --rw=${WRITE_PATTERN} ${IOSETTINGS} ${STDOPTS} ${RUNOPTS} ${EXTRA_FLAGS}
 drop_caches
 
-launch_fio --rw=read ${IOSETTINGS} ${STDOPTS} ${RUNOPTS} ${EXTRA_FLAGS}
+launch_fio --rw=${READ_PATTERN} ${IOSETTINGS} ${STDOPTS} ${RUNOPTS} ${EXTRA_FLAGS}
 drop_caches
 
 # Clean up the job
