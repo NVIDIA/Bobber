@@ -290,6 +290,9 @@ def find_num_nodes(logfile: str) -> int:
         Returns an ``integer`` of the number of nodes tested.
     """
     clear_cache_command = re.findall(r'srun.*Clearing cache on ', logfile)
+    if len(clear_cache_command) == 0:
+        print('Unable to find number of nodes tested. Assuming single node.')
+        return 1
     n_tasks = re.findall(r'ntasks=\d+', clear_cache_command[0])
     num_nodes = n_tasks[0].replace('ntasks=', '')
     return num_nodes
@@ -313,6 +316,9 @@ def find_filesystem_test_path(logfile: str) -> str:
         Returns a ``string`` of the location of the filesystem.
     """
     container_mounts_line = re.findall(r'container-mounts=\S*:/data', logfile)
+    if len(container_mounts_line) == 0:
+        print('Unable to find container mount directory. Leaving empty.')
+        return '<Unknown>'
     container_data_mount = container_mounts_line[0].replace(
         'container-mounts=', '')
     return container_data_mount
