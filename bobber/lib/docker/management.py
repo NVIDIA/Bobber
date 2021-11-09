@@ -29,11 +29,23 @@ class DockerManager:
         try:
             self.client = docker.from_env()
             self.cli = docker.APIClient(timeout=600)
+            self.docker_running = True
         except docker.errors.DockerException as e:
             if 'error while fetching server api version' in str(e).lower():
-                print('Error: Could not communicate with the Docker daemon.')
-                print('Ensure Docker is running with "systemctl start docker"')
-                sys.exit(DOCKER_COMMUNICATION_ERROR)
+                self.docker_running = False
+
+    def _verify_docker_running(self, *args, **kwargs) -> None:
+        """
+        Raise a DOCKER_COMMUNICATION_ERROR when Docker isn't running.
+
+        If a command is attempted to be run that requires Docker and Docker is
+        either not installed or not running, an error needs to be raised
+        gracefully to the user.
+        """
+        if not self.docker_running:
+            print('Error: Could not communicate with the Docker daemon.')
+            print('Ensure Docker is running with "systemctl start docker"')
+            sys.exit(DOCKER_COMMUNICATION_ERROR)
 
     def _build_if_not_built(self, tag: str, bobber_version: str) -> NoReturn:
         """
@@ -102,6 +114,7 @@ class DockerManager:
         bobber_version : string
             A ``string`` of the local version of Bobber, such as '5.0.0'.
         """
+        self._verify_docker_running()
         tag = self.get_tag(bobber_version)
         self._build_if_not_built(tag, bobber_version)
         runtime = None
@@ -155,6 +168,7 @@ class DockerManager:
         bobber_version : string
             A ``string`` of the local version of Bobber, such as '5.0.0'.
         """
+        self._verify_docker_running()
         tag = self.get_tag(bobber_version)
         self._build_if_not_built(tag, bobber_version)
         filename = tag.replace('/', '_').replace(':', '_')
@@ -177,6 +191,7 @@ class DockerManager:
         bobber_version : string
             A ``string`` of the local version of Bobber, such as '5.0.0'.
         """
+        self._verify_docker_running()
         tag = self.get_tag(bobber_version)
         print('Building a new image. This may take a while...')
         # Set the path to the repository's parent directory.
@@ -208,6 +223,7 @@ class DockerManager:
             A ``string`` of the filename for the local tarball to load, such as
             './nvidia_bobber_5.0.0.tar'.
         """
+        self._verify_docker_running()
         print(f'Importing {filename}. This may take a while...')
         with open(filename, 'rb') as image_file:
             self.client.images.load(image_file)
@@ -233,6 +249,7 @@ class DockerManager:
         log_file : string (Optional)
             A ``string`` of the path and filename to optionally save output to.
         """
+        self._verify_docker_running()
         if not self.running:
             print('Bobber container not running. Launch a container with '
                   '"bobber cast" prior to running any tests.')
@@ -281,6 +298,7 @@ class DockerManager:
         bool
             Returns `True` when the versions match and `False` when not.
         """
+        self._verify_docker_running()
         if f'nvidia/bobber:{version}' not in container.image.tags:
             return False
         return True
