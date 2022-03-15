@@ -155,7 +155,7 @@ def fio_iops_results(log_contents: str, systems: int, string_to_match: str,
         return []
     for result in match:
         iops = re.findall(r'[-+]?\d*\.\d+[kMG]|\d+[kMG]|\d+', result)
-        if len(iops) != 5:
+        if len(iops) not in [5, 6]:
             raise ValueError('IOPS cannot be parsed from FIO log!')
         iops = clean_iops(iops[0])
         final_iops.append(iops)
