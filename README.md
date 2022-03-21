@@ -58,14 +58,14 @@ The installation can be verified with `pip3 freeze` after completion:
 
 ```bash
 $ pip3 freeze | grep bobber
-nvidia-bobber==6.3.0
+nvidia-bobber==6.3.1
 ```
 
 Bobber can also be verified by printing the usage statement:
 
 ```
 $ bobber --help
-usage: Bobber Version: 6.3.0 [-h] command ...
+usage: Bobber Version: 6.3.1 [-h] command ...
 
 positional arguments:
   command
@@ -100,7 +100,7 @@ Using `pip3`, install the wheel using the address from the previous step to all
 remote machines which will be tested, for example:
 
 ```bash
-pip3 install https://github.com/NVIDIA/Bobber/releases/download/v6.3.0/nvidia_bobber-6.3.0-py3-none-any.whl
+pip3 install https://github.com/NVIDIA/Bobber/releases/download/v6.3.1/nvidia_bobber-6.3.1-py3-none-any.whl
 ```
 
 ## Build Bobber container (includes OSU Tests, NCCL Tests, fio, mdtest, DALI RN50 Pipeline, and the base NGC TensorFlow container)
@@ -120,7 +120,7 @@ After building, verify the image is accessible in Docker:
 
 ```bash
 $ docker images | grep nvidia/bobber
-nvidia/bobber               6.3.0               8e545fee7a4d        10 minutes ago      5.23GB
+nvidia/bobber               6.3.1               a467a25ff008        10 minutes ago      5.23GB
 ```
 
 ## Save container
@@ -135,10 +135,10 @@ If running on a single node, this step is not required.
 
 ```bash
 $ bobber export
-Exporting nvidia/bobber:6.3.0 to "nvidia_bobber_6.3.0.tar". This may take a while...
-nvidia/bobber:6.3.0 saved to nvidia_bobber_6.3.0.tar
+Exporting nvidia/bobber:6.3.1 to "nvidia_bobber_6.3.1.tar". This may take a while...
+nvidia/bobber:6.3.1 saved to nvidia_bobber_6.3.1.tar
 $ ls
-nvidia_bobber_6.3.0.tar
+nvidia_bobber_6.3.1.tar
 ```
 
 ## Copy container to other nodes
@@ -170,7 +170,7 @@ On all other nodes, load the copied Docker image.
 ```bash
 $ docker load < nvidia_bobber_{version}.tar
 $ docker images | grep bobber
-nvidia/bobber               6.3.0               8e545fee7a4d        10 minutes ago      5.23GB
+nvidia/bobber               6.3.1               a467a25ff008        10 minutes ago      5.23GB
 ```
 
 ## Ensure shared filesystem is mounted, if necessary
