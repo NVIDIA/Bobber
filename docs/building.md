@@ -60,9 +60,9 @@ run:
 ./build-dev-wheel
 ```
 
-If the current version of the package is `6.3.0`, this will generated a new
+If the current version of the package is `6.3.1`, this will generated a new
 wheel in the local `dist/` directory (which will be created if not already done)
-with the version `6.3.0.dev20210323084016` depending on the time the script was
+with the version `6.3.1.dev20210323084016` depending on the time the script was
 run.
 
 Likewise, running
@@ -71,7 +71,7 @@ Likewise, running
 ./build-dev-wheel patch
 ```
 
-will generate a wheel in `dist/` with version `6.3.1.dev20210323084016` and
+will generate a wheel in `dist/` with version `6.3.2.dev20210323084016` and
 
 ```
 ./build-dev-wheel minor

@@ -42,7 +42,7 @@ def num_systems(log: str) -> int:
 def _bobber_version(log: str) -> str:
     """
     Returns a ``string`` representation of the Bobber version tested, such as
-    '6.3.0'.
+    '6.3.1'.
 
     Parameters
     ----------
@@ -52,7 +52,7 @@ def _bobber_version(log: str) -> str:
     Returns
     -------
     str
-        Returns a ``string`` of the Bobber version tested, such as '6.3.0'.
+        Returns a ``string`` of the Bobber version tested, such as '6.3.1'.
 
     Raises
     ------
