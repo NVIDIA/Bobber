@@ -4,3 +4,4 @@ build/*
 dist/*
 env/*
 nvidia_bobber.egg-info/
+*.out

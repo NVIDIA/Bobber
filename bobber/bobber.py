@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 import bobber.lib.docker
 import json
+import sys
 from argparse import ArgumentParser, ArgumentTypeError, Namespace
 from copy import copy
 from bobber import __version__
@@ -88,11 +89,20 @@ def parse_args(version: str) -> Namespace:
 
     # More general options which apply to a majority of the running commands
     # Note that all arguments prepended with '--' are optional
+    commands_parent.add_argument('--slurm', help='Run a test on an existing '
+                                 'SLURM cluster with Pyxis/Enroot installed',
+                                 action='store_true')
+    commands_parent.add_argument('--storage-path', help='Path at which the '
+                                 'filesystem under test is mounted',
+                                 required='--slurm' in sys.argv)
     commands_parent.add_argument('log_path', metavar='log-path', help='Path '
                                  'used to store log files on the head node')
-    commands_parent.add_argument('hosts', help='Comma-separated list of '
+    commands_parent.add_argument('hosts', help='Number of hosts to queue a '
+                                 'job for in a SLURM cluster.' if '--slurm'
+                                 in sys.argv else 'Comma-separated list of '
                                  'hostnames or IP addresses',
-                                 type=unique_hosts)
+                                 type=int if '--slurm' in sys.argv
+                                 else unique_hosts)
     commands_parent.add_argument('--config-path', help='Read a JSON config '
                                  'file with expected parameters and use those '
                                  'values for testing. Ignores all other '
@@ -384,6 +394,15 @@ def execute_command(args: Namespace, version: str) -> NoReturn:
         bobber.lib.docker.cast(args.storage_path, args.ignore_gpu, version)
     elif args.command == LOAD:
         bobber.lib.docker.load(args.filename)
+    elif args.slurm and args.command == RUN_NCCL:
+        args = load_settings(args)
+        bobber.lib.system.slurm.run_nccl(args, version)
+    elif args.slurm and args.command == RUN_DALI:
+        args = load_settings(args)
+        bobber.lib.system.slurm.run_dali(args, version)
+    elif args.slurm and args.command == RUN_STG_META:
+        args = load_settings(args)
+        bobber.lib.system.slurm.run_meta(args, version)
     else:
         # Update the version to be used in filenames
         version_underscore = version.replace('.', '_')
